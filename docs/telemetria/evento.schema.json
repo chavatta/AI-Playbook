@@ -1,0 +1,3313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:playbook-telemetry:evento:v1",
+  "title": "TelemetryEvent v1",
+  "description": "Evento de telemetria do playbook (playbook.telemetry/v1), gerado a partir do schema Zod do contrato. Envelope estrito; data por tipo é loose (chave desconhecida é preservada). Invariantes fora do JSON Schema: o tempo do ULID de event_id corresponde a ts (tolerância de 1 ms) e o evento serializado tem no máximo 64 KiB (data, 48 KiB).",
+  "x-playbook-schema": "playbook.telemetry/v1",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "session.start"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_session_start"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "session.end"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_session_end"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "prompt.submit"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_prompt_submit"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "tool.pre"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_tool_pre"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "tool.post"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_tool_post"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "tool.fail"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_tool_fail"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "subagent.start"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_subagent_start"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "subagent.stop"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_subagent_stop"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "handoff.pointer"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_handoff_pointer"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "permission.request"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_permission_request"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "permission.resolved"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_permission_resolved"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "notification"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_notification"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "decision.requested"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_decision_requested"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "decision.answered"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_decision_answered"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "bus.message"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_bus_message"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "bus.handoff"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_bus_handoff"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "bus.claim"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_bus_claim"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "progress.report"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_progress_report"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "usage.report"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_usage_report"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "limit.hit"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_limit_hit"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "limit.status"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_limit_status"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "flow.step"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_flow_step"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "gate.verdict"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_gate_verdict"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "task.indexed"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_task_indexed"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "run.state"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_run_state"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "compact"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_compact"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "error"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_error"
+        }
+      }
+    },
+    {
+      "$ref": "#/$defs/Envelope",
+      "properties": {
+        "type": {
+          "const": "alert"
+        },
+        "data": {
+          "$ref": "#/$defs/Data_alert"
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "AgentRef": {
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "role": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "runtime": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,31}$"
+        },
+        "session_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "agent_name": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "additionalProperties": {}
+    },
+    "DataBase": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        }
+      },
+      "additionalProperties": {}
+    },
+    "Data_alert": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 512,
+          "x-detail": "standard"
+        },
+        "scope": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "dedupe_key": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "cleared": {
+          "type": "boolean"
+        }
+      },
+      "required": ["kind"],
+      "additionalProperties": {}
+    },
+    "Data_bus_claim": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "claim_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "task_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        },
+        "claimed_by": {
+          "$ref": "#/$defs/AgentRef"
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["task", "files"]
+        },
+        "files": {
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 512
+          }
+        },
+        "result": {
+          "type": "string",
+          "enum": ["granted", "conflict", "released"]
+        },
+        "conflict_with": {
+          "$ref": "#/$defs/AgentRef"
+        }
+      },
+      "required": ["claim_id", "task_id", "claimed_by", "scope", "result"],
+      "additionalProperties": {}
+    },
+    "Data_bus_handoff": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "message_id": {
+          "type": "string",
+          "pattern": "^msg_[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "from": {
+          "$ref": "#/$defs/AgentRef"
+        },
+        "to": {
+          "$ref": "#/$defs/AgentRef"
+        },
+        "task_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        },
+        "pointer": {
+          "$ref": "#/$defs/PointerFields"
+        },
+        "cross_runtime": {
+          "type": "boolean"
+        },
+        "accepted": {
+          "type": "boolean"
+        }
+      },
+      "required": ["message_id", "from", "to", "task_id", "cross_runtime"],
+      "additionalProperties": {}
+    },
+    "Data_bus_message": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "message_id": {
+          "type": "string",
+          "pattern": "^msg_[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "phase": {
+          "type": "string",
+          "enum": ["sent", "delivered", "read"]
+        },
+        "from": {
+          "$ref": "#/$defs/AgentRef"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "broadcast": {
+                  "type": "boolean",
+                  "const": true
+                }
+              },
+              "required": ["broadcast"],
+              "additionalProperties": false
+            },
+            {
+              "$ref": "#/$defs/AgentRef"
+            }
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["message", "reply"]
+        },
+        "subject": {
+          "type": "string",
+          "maxLength": 200,
+          "x-detail": "standard"
+        },
+        "body_chars": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "body_preview": {
+          "type": "string",
+          "maxLength": 256,
+          "x-detail": "verbose"
+        },
+        "in_reply_to": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "cross_runtime": {
+          "type": "boolean"
+        }
+      },
+      "required": ["message_id", "phase", "from", "to", "kind", "body_chars", "cross_runtime"],
+      "additionalProperties": {}
+    },
+    "Data_compact": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "phase": {
+          "type": "string",
+          "enum": ["pre", "post", "boundary"]
+        },
+        "trigger": {
+          "type": "string",
+          "enum": ["manual", "auto", "unknown"]
+        },
+        "tokens_before": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "tokens_after": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "context_window": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "context_used_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": ["phase", "trigger"],
+      "additionalProperties": {}
+    },
+    "Data_decision_answered": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "decision_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "answer": {
+          "type": "object",
+          "properties": {
+            "option_id": {
+              "type": "string",
+              "maxLength": 32
+            },
+            "free_text": {
+              "type": "string",
+              "maxLength": 2048
+            }
+          },
+          "additionalProperties": {}
+        },
+        "answered_by": {
+          "type": "string",
+          "enum": ["tech_lead", "rule", "timeout", "canceled"]
+        },
+        "latency_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "delivered": {
+          "type": "string",
+          "enum": ["in_process", "resume", "pending_delivery", "not_applicable"]
+        }
+      },
+      "required": ["decision_id", "answer", "answered_by", "latency_ms", "delivered"],
+      "additionalProperties": {}
+    },
+    "Data_decision_requested": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "decision_id": {
+          "type": "string",
+          "pattern": "^dec_[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "label": {
+          "type": "string",
+          "pattern": "^D-[1-9][0-9]*$"
+        },
+        "source": {
+          "type": "string",
+          "enum": ["mcp_tool", "permission", "rule", "pointer", "limit", "budget", "plan_approval", "runtime_question"]
+        },
+        "rule": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "options": {
+          "maxItems": 10,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 32
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": ["id", "label"],
+            "additionalProperties": {}
+          }
+        },
+        "recommendation": {
+          "type": "object",
+          "properties": {
+            "option_id": {
+              "type": "string",
+              "maxLength": 32
+            },
+            "rationale": {
+              "type": "string",
+              "maxLength": 1024
+            }
+          },
+          "additionalProperties": {}
+        },
+        "blocking": {
+          "type": "boolean"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "normal", "high", "urgent"]
+        },
+        "requester": {
+          "$ref": "#/$defs/AgentRef"
+        },
+        "wait_seconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "context_ref": {
+          "type": "string",
+          "maxLength": 256
+        }
+      },
+      "required": ["decision_id", "source", "question", "blocking", "priority", "requester"],
+      "additionalProperties": {}
+    },
+    "Data_error": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["runtime", "adapter", "hook", "importer", "indexer", "collector", "mcp", "portal"]
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "fatal": {
+          "type": "boolean"
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 1024,
+          "x-detail": "standard"
+        },
+        "http_status": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "retry_in_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exit_code": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "hook_event": {
+          "type": "string",
+          "maxLength": 48
+        }
+      },
+      "required": ["scope", "code", "fatal"],
+      "additionalProperties": {}
+    },
+    "Data_flow_step": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "origin": {
+          "type": "string",
+          "enum": ["portal", "workflow_journal", "run_log"]
+        },
+        "flow": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48
+        },
+        "step_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "state": {
+          "type": "string",
+          "enum": ["started", "completed", "skipped", "failed"]
+        },
+        "step_index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "step_total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "role": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "phase": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "parallel_group": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "raw_event": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "raw_status": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "ref": {
+          "type": "string",
+          "maxLength": 256
+        }
+      },
+      "required": ["origin", "flow", "step_id", "state"],
+      "additionalProperties": {},
+      "if": {
+        "properties": {
+          "origin": {
+            "const": "portal"
+          }
+        },
+        "required": ["origin"]
+      },
+      "then": {
+        "required": ["step_index", "step_total"]
+      }
+    },
+    "Data_gate_verdict": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "gate": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48
+        },
+        "artifact_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "verdict": {
+          "type": "string",
+          "enum": ["APROVADO", "REPROVADO", "APROVADO_COM_RESSALVAS", "APROVADO_COM_CONDICOES", "AUSENTE", "ILEGIVEL"]
+        },
+        "first_line_rule": {
+          "type": "boolean"
+        },
+        "issues_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "file_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": ["gate", "artifact_path", "verdict", "first_line_rule", "file_sha256"],
+      "additionalProperties": {}
+    },
+    "Data_handoff_pointer": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "agent": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "model": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "provider": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,31}$"
+        },
+        "task_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["completed", "blocked", "needs_review"]
+        },
+        "checkpoint": {
+          "type": "boolean",
+          "const": true
+        },
+        "artifact_path": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "files_changed": {
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 512
+          }
+        },
+        "next_agent": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "context_for_next": {
+          "type": "string",
+          "maxLength": 1024,
+          "x-detail": "standard"
+        },
+        "blockers": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "x-detail": "standard"
+        },
+        "skill_candidates": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "needs_human": {
+          "$ref": "#/$defs/NeedsHuman"
+        },
+        "source": {
+          "type": "string",
+          "enum": ["workflow_journal", "transcript", "subagent_stop", "runner", "bus"]
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "validation_errors": {
+          "maxItems": 10,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "raw": {
+          "type": "string",
+          "maxLength": 4096,
+          "x-detail": "standard"
+        }
+      },
+      "required": ["source", "valid"],
+      "additionalProperties": {}
+    },
+    "Data_limit_hit": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "limit_kind": {
+          "type": "string",
+          "enum": [
+            "subscription_window",
+            "subscription_weekly",
+            "model_limit",
+            "spend_cap",
+            "credits",
+            "api_key_limit",
+            "rate_limit",
+            "guardrail",
+            "budget_run",
+            "budget_day",
+            "budget_month",
+            "unknown"
+          ]
+        },
+        "window": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "resets_at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "retry_after_s": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "http_status": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "error_code": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 512,
+          "x-detail": "standard"
+        },
+        "detected_from": {
+          "type": "string",
+          "enum": [
+            "rate_limit_event",
+            "stop_failure",
+            "assistant_error",
+            "result_error",
+            "transcript_synthetic",
+            "stream_text",
+            "stderr_text",
+            "rollout",
+            "http_status",
+            "budget_engine"
+          ]
+        },
+        "action": {
+          "type": "string",
+          "enum": ["pause_provider", "fallback", "decision", "none"]
+        }
+      },
+      "required": ["limit_kind", "detected_from"],
+      "additionalProperties": {}
+    },
+    "Data_limit_status": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["allowed", "allowed_warning", "rejected", "unknown"]
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "rate_limit_event",
+            "statusline",
+            "rollout",
+            "app_server",
+            "usage_command",
+            "api_key_endpoint",
+            "budget_engine"
+          ]
+        },
+        "window": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "used_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "utilization_raw": {
+          "type": "number"
+        },
+        "resets_at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "overage": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "maxLength": 32
+            },
+            "in_use": {
+              "type": "boolean"
+            },
+            "disabled_reason": {
+              "type": "string",
+              "maxLength": 64
+            }
+          },
+          "additionalProperties": {}
+        },
+        "limit_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "remaining_usd": {
+          "type": "number"
+        },
+        "used_usd": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": ["status", "source"],
+      "additionalProperties": {}
+    },
+    "Data_notification": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 48
+        },
+        "level": {
+          "type": "string",
+          "enum": ["info", "warning", "error"]
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 512,
+          "x-detail": "standard"
+        },
+        "model_from": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "model_to": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "termination_reason": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "mcp": {
+          "type": "object",
+          "properties": {
+            "failed": {
+              "maxItems": 50,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 64
+              }
+            },
+            "needs_auth": {
+              "maxItems": 50,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 64
+              }
+            }
+          },
+          "additionalProperties": {}
+        },
+        "pr": {
+          "type": "object",
+          "properties": {
+            "number": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "repository": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "additionalProperties": {}
+        }
+      },
+      "required": ["kind"],
+      "additionalProperties": {}
+    },
+    "Data_permission_request": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "mechanism": {
+          "type": "string",
+          "enum": ["hook", "permission_prompt_tool", "app_server", "acp", "harness", "stream_denial"]
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "tool_category": {
+          "type": "string",
+          "enum": ["edit", "write", "read", "search", "fetch", "shell", "test", "db", "git", "agent", "mcp", "other"]
+        },
+        "tool_use_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "target": {
+          "$ref": "#/$defs/ToolTarget"
+        },
+        "suggestions_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "decision_id": {
+          "type": "string",
+          "pattern": "^dec_[0-9A-HJKMNP-TV-Z]{26}$"
+        }
+      },
+      "required": ["request_id", "mechanism", "tool_name", "tool_category"],
+      "additionalProperties": {}
+    },
+    "Data_permission_resolved": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "request_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "tool_name": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "tool_use_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "decision": {
+          "type": "string",
+          "enum": ["allow", "allow_always", "deny", "soft_denied", "timeout"]
+        },
+        "decided_by": {
+          "type": "string",
+          "enum": ["human", "rule", "auto_review", "runtime", "timeout"]
+        },
+        "decision_id": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 256,
+          "x-detail": "standard"
+        },
+        "latency_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["decision", "decided_by"],
+      "additionalProperties": {}
+    },
+    "Data_progress_report": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["agent", "heartbeat", "plan"]
+        },
+        "activity": {
+          "type": "string",
+          "enum": ["thinking", "responding", "waiting"]
+        },
+        "step": {
+          "type": "string",
+          "maxLength": 16
+        },
+        "step_index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "step_total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "phase": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 280,
+          "x-detail": "standard"
+        },
+        "plan_total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "plan_done": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["kind"],
+      "additionalProperties": {}
+    },
+    "Data_prompt_submit": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "origin": {
+          "type": "string",
+          "enum": ["human", "portal", "agent", "queued", "system", "unknown"]
+        },
+        "chars": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "sha256_12": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{12}$"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^req_[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "preview": {
+          "type": "string",
+          "maxLength": 160,
+          "x-detail": "verbose"
+        }
+      },
+      "required": ["origin", "chars"],
+      "additionalProperties": {}
+    },
+    "Data_run_state": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "queued",
+            "starting",
+            "running",
+            "waiting_human",
+            "waiting_bus",
+            "limit_hit",
+            "interrupted",
+            "completed",
+            "failed",
+            "blocked",
+            "killed",
+            "cancelled"
+          ]
+        },
+        "prev_state": {
+          "type": "string",
+          "enum": [
+            "queued",
+            "starting",
+            "running",
+            "waiting_human",
+            "waiting_bus",
+            "limit_hit",
+            "interrupted",
+            "completed",
+            "failed",
+            "blocked",
+            "killed",
+            "cancelled"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "billing": {
+          "type": "string",
+          "enum": ["subscription", "api"]
+        },
+        "step": {
+          "type": "object",
+          "properties": {
+            "flow": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 48
+            },
+            "index": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": ["flow", "index", "total"],
+          "additionalProperties": {}
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "retry_of_run_id": {
+          "type": "string",
+          "pattern": "^run_[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "resumed_from_run_id": {
+          "type": "string",
+          "pattern": "^run_[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "continues_run_id": {
+          "type": "string",
+          "pattern": "^run_[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "exit_code": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "fallback": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "model": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": ["provider", "model"],
+              "additionalProperties": {}
+            },
+            "to": {
+              "type": "object",
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "model": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": ["provider", "model"],
+              "additionalProperties": {}
+            },
+            "policy": {
+              "type": "string",
+              "enum": ["auto_subscription", "auto_api_allowed", "human_decision"]
+            }
+          },
+          "required": ["from", "to", "policy"],
+          "additionalProperties": {}
+        }
+      },
+      "required": ["state", "role", "billing"],
+      "additionalProperties": {}
+    },
+    "Data_session_end": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "error", "interrupted", "canceled", "unknown"]
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "num_turns": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "error_code": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": ["status"],
+      "additionalProperties": {}
+    },
+    "Data_session_start": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "trigger": {
+          "type": "string",
+          "enum": ["startup", "resume", "clear", "compact", "fork", "unknown"]
+        },
+        "permission_mode": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "effort": {
+          "type": "string",
+          "maxLength": 16
+        },
+        "tools_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "mcp_servers": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 64
+              },
+              "status": {
+                "type": "string",
+                "maxLength": 32
+              }
+            },
+            "required": ["name", "status"],
+            "additionalProperties": {}
+          }
+        },
+        "api_key_source": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "billing": {
+          "type": "string",
+          "enum": ["subscription", "api", "unknown"]
+        },
+        "agent_definition": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "model_display": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": ["trigger"],
+      "additionalProperties": {}
+    },
+    "Data_subagent_start": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "agent_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "parent_tool_use_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "agent_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 200,
+          "x-detail": "standard"
+        },
+        "model_requested": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "background": {
+          "type": "boolean"
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": ["agent_type"],
+      "additionalProperties": {},
+      "anyOf": [
+        {
+          "required": ["agent_id"]
+        },
+        {
+          "required": ["parent_tool_use_id"]
+        }
+      ]
+    },
+    "Data_subagent_stop": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "agent_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "parent_tool_use_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "agent_type": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "status": {
+          "type": "string",
+          "enum": ["completed", "failed", "stopped", "killed", "unknown"]
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "tool_uses": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "tokens_total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "model_resolved": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "tool_stats": {
+          "type": "object",
+          "properties": {
+            "read": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "search": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "bash": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "edit_files": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "lines_added": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "lines_removed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "other": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "additionalProperties": {}
+        }
+      },
+      "required": ["status"],
+      "additionalProperties": {},
+      "anyOf": [
+        {
+          "required": ["agent_id"]
+        },
+        {
+          "required": ["parent_tool_use_id"]
+        }
+      ]
+    },
+    "Data_task_indexed": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "change": {
+          "type": "string",
+          "enum": ["created", "updated", "deleted"]
+        },
+        "key": {
+          "type": "string",
+          "maxLength": 256,
+          "pattern": "^[^/\\s]+\\/[^/\\s]+$"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["playbook", "legacy_t", "free", "backlog_only"]
+        },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "complexity": {
+          "type": "string",
+          "enum": ["trivial", "simples", "media", "complexa", "epica"]
+        },
+        "sensitive": {
+          "type": "boolean"
+        },
+        "sensitive_source": {
+          "maxItems": 3,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["brief", "class", "recon"]
+          }
+        },
+        "data_class": {
+          "type": "string",
+          "maxLength": 16
+        },
+        "flow": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "phase": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "status": {
+          "type": "string",
+          "enum": ["todo", "in_progress", "blocked", "done", "done_inconsistent", "escalated", "divergence", "sliced"]
+        },
+        "has": {
+          "type": "object",
+          "properties": {
+            "folder": {
+              "type": "boolean"
+            },
+            "brief": {
+              "type": "boolean"
+            },
+            "run_log": {
+              "type": "boolean"
+            },
+            "memory": {
+              "type": "boolean"
+            },
+            "decisions": {
+              "type": "boolean"
+            },
+            "telemetry_spool": {
+              "type": "boolean"
+            }
+          },
+          "required": ["folder", "brief", "run_log", "memory", "decisions", "telemetry_spool"],
+          "additionalProperties": {}
+        },
+        "gates": {
+          "type": "object",
+          "properties": {
+            "reviewer": {
+              "type": "string",
+              "maxLength": 48
+            },
+            "security_sre": {
+              "type": "string",
+              "maxLength": 48
+            }
+          },
+          "additionalProperties": {}
+        },
+        "run_log_rows": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "last_row": {
+          "type": "object",
+          "properties": {
+            "ts": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+            },
+            "agent": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "event": {
+              "type": "string",
+              "maxLength": 48
+            },
+            "status": {
+              "type": "string",
+              "maxLength": 48
+            }
+          },
+          "additionalProperties": {}
+        }
+      },
+      "required": ["change", "key", "format", "content_hash", "status", "has"],
+      "additionalProperties": {}
+    },
+    "Data_tool_fail": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "tool_category": {
+          "type": "string",
+          "enum": ["edit", "write", "read", "search", "fetch", "shell", "test", "db", "git", "agent", "mcp", "other"]
+        },
+        "tool_intent": {
+          "type": "string",
+          "enum": [
+            "delegate",
+            "message",
+            "wait",
+            "ask_human",
+            "plan",
+            "claim",
+            "report",
+            "schedule",
+            "worktree",
+            "skill"
+          ]
+        },
+        "category_source": {
+          "type": "string",
+          "enum": ["origin", "server"]
+        },
+        "classifier_rule": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "tool_use_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "target": {
+          "$ref": "#/$defs/ToolTarget"
+        },
+        "input_preview": {
+          "type": "string",
+          "maxLength": 2048,
+          "x-detail": "verbose"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exit_code": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "error_kind": {
+          "type": "string",
+          "enum": ["error", "timeout", "permission_denied", "declined", "interrupted", "unknown"]
+        },
+        "error": {
+          "type": "string",
+          "maxLength": 512,
+          "x-detail": "standard"
+        }
+      },
+      "required": ["tool_name", "tool_category", "category_source", "error_kind"],
+      "additionalProperties": {}
+    },
+    "Data_tool_post": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "tool_category": {
+          "type": "string",
+          "enum": ["edit", "write", "read", "search", "fetch", "shell", "test", "db", "git", "agent", "mcp", "other"]
+        },
+        "tool_intent": {
+          "type": "string",
+          "enum": [
+            "delegate",
+            "message",
+            "wait",
+            "ask_human",
+            "plan",
+            "claim",
+            "report",
+            "schedule",
+            "worktree",
+            "skill"
+          ]
+        },
+        "category_source": {
+          "type": "string",
+          "enum": ["origin", "server"]
+        },
+        "classifier_rule": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "tool_use_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "target": {
+          "$ref": "#/$defs/ToolTarget"
+        },
+        "input_preview": {
+          "type": "string",
+          "maxLength": 2048,
+          "x-detail": "verbose"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "exit_code": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "interrupted": {
+          "type": "boolean"
+        },
+        "output_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "output_preview": {
+          "type": "string",
+          "maxLength": 1024,
+          "x-detail": "verbose"
+        },
+        "result_summary": {
+          "type": "object",
+          "properties": {
+            "lines_added": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "lines_removed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "files_changed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "additionalProperties": {}
+        }
+      },
+      "required": ["tool_name", "tool_category", "category_source"],
+      "additionalProperties": {}
+    },
+    "Data_tool_pre": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "tool_category": {
+          "type": "string",
+          "enum": ["edit", "write", "read", "search", "fetch", "shell", "test", "db", "git", "agent", "mcp", "other"]
+        },
+        "tool_intent": {
+          "type": "string",
+          "enum": [
+            "delegate",
+            "message",
+            "wait",
+            "ask_human",
+            "plan",
+            "claim",
+            "report",
+            "schedule",
+            "worktree",
+            "skill"
+          ]
+        },
+        "category_source": {
+          "type": "string",
+          "enum": ["origin", "server"]
+        },
+        "classifier_rule": {
+          "type": "string",
+          "maxLength": 48
+        },
+        "tool_use_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "target": {
+          "$ref": "#/$defs/ToolTarget"
+        },
+        "input_preview": {
+          "type": "string",
+          "maxLength": 2048,
+          "x-detail": "verbose"
+        }
+      },
+      "required": ["tool_name", "tool_category", "category_source"],
+      "additionalProperties": {}
+    },
+    "Data_usage_report": {
+      "type": "object",
+      "properties": {
+        "task_source": {
+          "type": "string",
+          "enum": ["env", "branch", "path_write", "sticky", "path_read", "portal", "file"]
+        },
+        "redactions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "truncated": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "inferred": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose"]
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["message", "turn", "run", "subagent", "session"]
+        },
+        "cumulative": {
+          "type": "boolean"
+        },
+        "includes_subagents": {
+          "type": "boolean"
+        },
+        "billing": {
+          "type": "string",
+          "enum": ["subscription", "api", "unknown"]
+        },
+        "tokens": {
+          "$ref": "#/$defs/Tokens"
+        },
+        "tokens_raw": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "maxProperties": 20
+        },
+        "cost_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "cost_kind": {
+          "type": "string",
+          "enum": ["official", "estimate_list_price", "estimate_table", "none"]
+        },
+        "per_model": {
+          "maxItems": 10,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "model": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "canonical": {
+                "type": "string",
+                "maxLength": 128
+              },
+              "tokens": {
+                "$ref": "#/$defs/Tokens"
+              },
+              "cost_usd": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": ["model", "tokens"],
+            "additionalProperties": {}
+          }
+        },
+        "message_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "duration_api_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "num_turns": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "upstream_provider": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": ["scope", "cumulative", "billing", "tokens", "cost_kind"],
+      "additionalProperties": {}
+    },
+    "Envelope": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string",
+          "const": "playbook.telemetry/v1"
+        },
+        "event_id": {
+          "type": "string",
+          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "ts": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": ["hook", "adapter", "indexer", "importer", "portal", "mcp"]
+            },
+            "runtime": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]{0,31}$"
+            },
+            "runtime_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "host": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+            }
+          },
+          "required": ["kind"],
+          "additionalProperties": false
+        },
+        "project": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+            },
+            "root_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "remote": {
+              "type": "string",
+              "maxLength": 256,
+              "pattern": "^(?:[a-z0-9.-]+\\/[a-z0-9._~/-]+|local:[0-9a-f]{16})$"
+            }
+          },
+          "additionalProperties": false
+        },
+        "task_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[\\x21-\\x7e]+$"
+        },
+        "run_id": {
+          "type": "string",
+          "pattern": "^run_[0-9A-HJKMNP-TV-Z]{26}$"
+        },
+        "agent": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "type": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "instance_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[\\x21-\\x7e]+$"
+            },
+            "parent_instance_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[\\x21-\\x7e]+$"
+            }
+          },
+          "required": ["name"],
+          "additionalProperties": false
+        },
+        "provider": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,31}$"
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[\\x21-\\x7e]+$"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "session.start",
+            "session.end",
+            "prompt.submit",
+            "tool.pre",
+            "tool.post",
+            "tool.fail",
+            "subagent.start",
+            "subagent.stop",
+            "handoff.pointer",
+            "permission.request",
+            "permission.resolved",
+            "notification",
+            "decision.requested",
+            "decision.answered",
+            "bus.message",
+            "bus.handoff",
+            "bus.claim",
+            "progress.report",
+            "usage.report",
+            "limit.hit",
+            "limit.status",
+            "flow.step",
+            "gate.verdict",
+            "task.indexed",
+            "run.state",
+            "compact",
+            "error",
+            "alert"
+          ]
+        },
+        "data": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": {}
+        }
+      },
+      "required": ["schema", "event_id", "ts", "source", "type", "data"],
+      "additionalProperties": false
+    },
+    "NeedsHuman": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "question": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            },
+            "options": {
+              "maxItems": 10,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 200
+              }
+            },
+            "blocking": {
+              "type": "boolean"
+            }
+          },
+          "required": ["question"],
+          "additionalProperties": {}
+        }
+      ]
+    },
+    "PointerFields": {
+      "type": "object",
+      "properties": {
+        "agent": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "model": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "provider": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,31}$"
+        },
+        "task_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["completed", "blocked", "needs_review"]
+        },
+        "checkpoint": {
+          "type": "boolean",
+          "const": true
+        },
+        "artifact_path": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "files_changed": {
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 512
+          }
+        },
+        "next_agent": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "context_for_next": {
+          "type": "string",
+          "maxLength": 1024,
+          "x-detail": "standard"
+        },
+        "blockers": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "x-detail": "standard"
+        },
+        "skill_candidates": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "needs_human": {
+          "$ref": "#/$defs/NeedsHuman"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "Tokens": {
+      "type": "object",
+      "properties": {
+        "input": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cache_read": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "cache_write": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "output": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "reasoning": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": {}
+    },
+    "ToolTarget": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "paths_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "command": {
+          "type": "string",
+          "maxLength": 512,
+          "x-detail": "standard"
+        },
+        "command_head": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 160,
+          "x-detail": "standard"
+        },
+        "url": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "pattern": {
+          "type": "string",
+          "maxLength": 120,
+          "x-detail": "standard"
+        },
+        "subagent_type": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "mcp": {
+          "type": "object",
+          "properties": {
+            "server": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "maxLength": 128
+            }
+          },
+          "required": ["server", "tool"],
+          "additionalProperties": {}
+        },
+        "content_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": {}
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "_fonte": "Preços de API por milhão de tokens (USD), tabela pública da Anthropic consultada em 2026-09-29. Escrita de cache: 1,25x a entrada (TTL 5 min) e 2x (TTL 1 h). Atualize ao mudar a tabela; o relatório casa o modelo pelo prefixo mais longo.",
+  "_nota": "Em assinatura, o valor é custo equivalente de API: serve para comparar execuções e decisões, não é fatura.",
+  "_nota_haiku_5_5": "claude-haiku-5-5 (consultado em 2026-10-23): preço da faixa de prompt até 100K tokens; acima disso a tabela pública cobra 0,50 / 2,50 (entrada/saída). Escrita e releitura de cache pelas razões padrão (1,25x, 2x, 0,1x).",
+  "modelos": {
+    "claude-fable-5-1":  { "entrada": 10, "escrita_5m": 12.5, "escrita_1h": 20, "releitura": 0.25, "saida": 50 },
+    "claude-fable-5":    { "entrada": 10, "escrita_5m": 12.5, "escrita_1h": 20, "releitura": 1.0,  "saida": 50 },
+    "claude-opus-5-5":   { "entrada": 4,  "escrita_5m": 5,    "escrita_1h": 8,  "releitura": 0.2,  "saida": 20 },
+    "claude-opus-5":     { "entrada": 5,  "escrita_5m": 6.25, "escrita_1h": 10, "releitura": 0.5,  "saida": 25 },
+    "claude-sonnet-5-5": { "entrada": 2,  "escrita_5m": 2.5,  "escrita_1h": 4,  "releitura": 0.2,  "saida": 10 },
+    "claude-sonnet-5":   { "entrada": 2,  "escrita_5m": 2.5,  "escrita_1h": 4,  "releitura": 0.2,  "saida": 10 },
+    "claude-haiku-5-5":  { "entrada": 0.1, "escrita_5m": 0.125, "escrita_1h": 0.2, "releitura": 0.01, "saida": 0.5 },
+    "claude-haiku-4-5":  { "entrada": 1,  "escrita_5m": 1.25, "escrita_1h": 2,  "releitura": 0.1,  "saida": 5 }
+  }
+}

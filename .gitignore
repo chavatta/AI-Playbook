@@ -1,0 +1,31 @@
+# SO
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.idea/
+.vscode/
+*.swp
+
+# Ambiente local (nunca versionar segredo — praticas/06-devsecops.md)
+.env
+.env.*
+!.env.example
+
+# Claude Code — estado local de sessão
+.claude/settings.local.json
+.claude/worktrees/
+
+# Spool da telemetria: fila de envio, não evidência (docs/ADR-008 §4). Os únicos arquivos de tasks/ fora do git
+tasks/*/telemetry.jsonl*
+.claude/telemetry-spool.jsonl*
+
+# Handoff entre sessões — arquivo de trabalho, não versionado de propósito
+HANDOFF-SESSAO.md
+
+# Registro de avisos do hook context-budget (docs/ADR-009): medida de adesão, não evidência
+.claude/context-budget.jsonl
+
+# Staging da atualização do playbook (scripts/playbook-update.mjs): baixado, nunca aplicado sozinho
+.playbook-update/
