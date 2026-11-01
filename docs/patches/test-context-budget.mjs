@@ -19,7 +19,7 @@ const assert = (c, m) => { if (!c) throw new Error(m); };
 const perfil = (obj) => `# 00\n\n## Orçamento de contexto e execução\n\n<!-- orcamento-contexto:inicio -->\n\`\`\`json\n${JSON.stringify(obj, null, 2)}\n\`\`\`\n<!-- orcamento-contexto:fim -->\n`;
 const usage = (ctx) => JSON.stringify({ type: "assistant", message: { id: "m", usage: { input_tokens: 2, cache_read_input_tokens: ctx - 102, cache_creation_input_tokens: 100, output_tokens: 50 } } });
 
-function projeto({ limites, complexidade, primeiroPrompt = "Task x", ctxAgente, ctxSessao } = {}) {
+function projeto({ limites, complexidade, primeiroPrompt = "Task x", ctxAgente, ctxSessao, workflow = false } = {}) {
   const raiz = mkdtempSync(join(tmpdir(), "cb-"));
   mkdirSync(join(raiz, ".claude"));
   mkdirSync(join(raiz, "praticas"));
@@ -29,10 +29,11 @@ function projeto({ limites, complexidade, primeiroPrompt = "Task x", ctxAgente, 
   if (complexidade) writeFileSync(join(raiz, "tasks", T, "brief.md"), `**Complexidade:** ${complexidade}\n`);
   const sessao = `s-${Math.random().toString(36).slice(2)}`;
   const tdir = join(raiz, "transcricoes");
-  mkdirSync(join(tdir, sessao, "subagents"), { recursive: true });
+  const sub = workflow ? join(tdir, sessao, "subagents", "workflows", "wf_abc-123") : join(tdir, sessao, "subagents");
+  mkdirSync(sub, { recursive: true });
   const tp = join(tdir, `${sessao}.jsonl`);
   writeFileSync(tp, [JSON.stringify({ type: "user", message: { content: "oi" } }), ctxSessao ? usage(ctxSessao) : ""].join("\n"));
-  writeFileSync(join(tdir, sessao, "subagents", "agent-a1.jsonl"),
+  writeFileSync(join(sub, "agent-a1.jsonl"),
     [JSON.stringify({ type: "user", message: { content: primeiroPrompt.replace("{T}", T) } }), ctxAgente ? usage(ctxAgente) : ""].join("\n"));
   return { raiz, sessao, tp, T };
 }
@@ -179,6 +180,15 @@ caso("perfil com JSON inválido: defaults, sem erro", () => {
   writeFileSync(join(p.raiz, "praticas", "00-stack-e-defaults.md"), "<!-- orcamento-contexto:inicio -->\n```json\n{quebrado\n```\n<!-- orcamento-contexto:fim -->\n");
   const r = roda(p, { tool_response: { stdout: "x".repeat(40000) } });
   assert(r.code === 0 && r.ctx.includes("limite 8000"), r.ctx);
+});
+
+caso("agente de Workflow (subagents/workflows/{run}/): lê contexto e faixa da transcrição", () => {
+  const p = projeto({ limites: LIM, ctxAgente: 4000, workflow: true });
+  const r = roda(p, { agent_id: "a1", agent_type: "coder-sonnet" });
+  assert(/contexto em ~4000 tokens \(limite 1000\)/.test(r.ctx), r.ctx);
+  const q = projeto({ limites: LIM, complexidade: "complexa", primeiroPrompt: "Leia tasks/{T}/brief.md", workflow: true });
+  for (let i = 0; i < 4; i++) assert(roda(q, { agent_id: "a1", agent_type: "coder-sonnet" }).ctx === "", `chamada ${i + 1} abaixo do teto 5 da faixa complexa`);
+  assert(/faixa complexa/.test(roda(q, { agent_id: "a1", agent_type: "coder-sonnet" }).ctx), "5ª chamada: teto da faixa complexa, não da padrão");
 });
 
 caso("o bloco do perfil real do playbook é JSON válido e tem todas as chaves do hook", async () => {

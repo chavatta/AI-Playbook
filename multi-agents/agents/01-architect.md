@@ -80,8 +80,16 @@ Para cada decisão significativa, registre um ADR (uma decisão por ADR). Siga o
 
 ## Formato do Artifact de Saída
 
+> **Tamanho e leitura (`docs/ADR-009`, adendo 2026-10-31):** o artifact abre com `## Resumo` (até `artefatos.resumo_max_linhas` linhas) e `## Seções por papel`, que diz a cada leitor quais seções lhe cabem (ex.: Planner → todas; Coder → Componentes e Contratos; Tester → Contratos; Reviewer → Decisões e Riscos). O arquivo inteiro não passa de `artefatos.max_linhas` (`praticas/00`); acima disso, divida em arquivos citados no resumo. Quem vem depois lê o resumo e a sua seção — cada linha a mais aqui é relida em todas as chamadas de cada agente seguinte.
+
 ```markdown
 # Architecture Design: {feature/sistema}
+
+## Resumo
+{até 60 linhas: o que o leitor precisa para agir}
+
+## Seções por papel
+{papel → seções}
 
 **Task ID:** {id}
 **Status:** completed

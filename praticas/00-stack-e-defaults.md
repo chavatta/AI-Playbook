@@ -103,9 +103,9 @@ Limiares de consumo de contexto do fluxo multi-agent (`docs/ADR-009`). O bloco J
 {
   "paralelismo_max_agentes": 4,
   "checkpoint": {
-    "tool_calls_por_faixa": { "trivial": 15, "simples": 15, "media": 30, "complexa": 50 },
+    "tool_calls_por_faixa": { "trivial": 12, "simples": 12, "media": 20, "complexa": 30 },
     "faixa_padrao": "media",
-    "contexto_agente_tokens": 150000,
+    "contexto_agente_tokens": 80000,
     "lembrete_a_cada_tool_calls": 10,
     "max_por_fatia": 3
   },
@@ -118,6 +118,10 @@ Limiares de consumo de contexto do fluxo multi-agent (`docs/ADR-009`). O bloco J
     "leitura_max_linhas_sem_justificativa": 400,
     "saida_para_arquivo_linhas": 150,
     "quiet_max_linhas": 60
+  },
+  "artefatos": {
+    "resumo_max_linhas": 60,
+    "max_linhas": 250
   },
   "comandos_longos": {
     "background_acima_segundos": 180,
@@ -142,9 +146,9 @@ Limiares de consumo de contexto do fluxo multi-agent (`docs/ADR-009`). O bloco J
 | Chave | Default | Por que este default | Nota do projeto |
 |---|---|---|---|
 | `paralelismo_max_agentes` | 4 | Cabe o maior fan-out do script (3 lentes em task sensível) ou duas fatias com Coder ∥ Tester. Muitos agentes em paralelo disputam o limite de taxa, e espera longa entre chamadas expira o cache; fila é mais barata que reescrita de cache. Sinal de limite de taxa → reduza, não enfileire mais | |
-| `checkpoint.tool_calls_por_faixa` | 15 / 15 / 30 / 50 | É o teto de tool calls por agente de cada faixa (`multi-agents/ARCHITECTURE.md` → Scaling de Esforço). Passou do teto, a execução já está fora do esperado e a releitura cresce com o quadrado das chamadas | |
+| `checkpoint.tool_calls_por_faixa` | 12 / 12 / 20 / 30 | Teto de tool calls por agente de cada faixa (`multi-agents/ARCHITECTURE.md` → Scaling de Esforço). A releitura cresce com o quadrado das chamadas: um agente de 32 chamadas relê ~4× o de 16. O agente junta leituras e buscas independentes na mesma resposta, então o mesmo trabalho cabe em menos chamadas; passou do teto, checkpoint (ADR-009, adendo 2026-10-31) | |
 | `checkpoint.faixa_padrao` | `media` | Usada quando o hook não acha a complexidade da task (recon ou brief) | |
-| `checkpoint.contexto_agente_tokens` | 150 000 | Com poucas dezenas de chamadas, o agente já releu o próprio histórico o bastante para que um agente novo, partindo do checkpoint, saia mais barato | |
+| `checkpoint.contexto_agente_tokens` | 80 000 | Acima disso, cada chamada relê ≥ 80k; um agente novo parte do checkpoint com ~15k. Em execução real, os dois agentes que passaram de 150k leram 3,5 M de 7 M da task (ADR-009, adendo 2026-10-31) | |
 | `checkpoint.lembrete_a_cada_tool_calls` | 10 | O aviso repete, mas não a cada chamada — aviso em toda chamada vira ruído | |
 | `checkpoint.max_por_fatia` | 3 | Três checkpoints ≈ 4× o teto da faixa. Mais que isso, a fatia está grande demais e volta para o Planner | |
 | `sessao_orquestrador.contexto_max_tokens` | 250 000 | A sessão do orquestrador relê tudo a cada turno; acima disso, uma sessão nova que parte do handoff (poucos k de contexto) custa menos que o próximo turno | |
@@ -153,6 +157,8 @@ Limiares de consumo de contexto do fluxo multi-agent (`docs/ADR-009`). O bloco J
 | `saida_ferramenta.leitura_max_linhas_sem_justificativa` | 400 | Mesmo tamanho de um PR (~200–400 linhas): acima disso quase nunca se precisa do arquivo inteiro | |
 | `saida_ferramenta.saida_para_arquivo_linhas` | 150 | Saída maior vai para `tasks/{id}/artifacts/` e o agente lê só o trecho | |
 | `saida_ferramenta.quiet_max_linhas` | 60 | O que os wrappers `*-quiet` mostram no máximo: falhas + resumo | |
+| `artefatos.resumo_max_linhas` | 60 | Spec, design e plano abrem com `## Resumo` deste tamanho e um índice "Seções por papel"; quem vem depois lê o resumo e só a sua seção, não o arquivo inteiro | |
+| `artefatos.max_linhas` | 250 | Teto do artefato inteiro. Acima disso o artefato vira vários (ex.: `planner.md` + `planner-grupo-NN.md`); spec de 573 linhas lida por 4 agentes é releitura pura | |
 | `comandos_longos.background_acima_segundos` | 180 | Comando com duração esperada acima de ~3 min roda em background (ou com timeout explícito) | |
 | `comandos_longos.polling_segundos` | 120 | Intervalo entre consultas ao comando em background; cada consulta é uma releitura barata que mantém o cache vivo | |
 | `comandos_longos.sem_chamada_max_segundos` | 270 | O cache dos subagentes tem vida de 5 min contada do início da chamada; 270 s deixa margem. Passou disso, a próxima chamada reescreve o contexto inteiro | |

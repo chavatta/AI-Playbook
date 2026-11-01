@@ -67,7 +67,7 @@ Nenhum texto do playbook afirmava que trocar Opus por Sonnet corta o custo pela 
 
 ### 5. Checkpoint de agente
 
-- **Limiar:** tool calls por faixa (`checkpoint.tool_calls_por_faixa`: 15 / 15 / 30 / 50 — o teto de cada faixa no `ARCHITECTURE.md`) ou contexto acima de `contexto_agente_tokens` (150 000).
+- **Limiar:** tool calls por faixa (`checkpoint.tool_calls_por_faixa`: 12 / 12 / 20 / 30 desde o adendo de 2026-10-31; antes 15 / 15 / 30 / 50) ou contexto acima de `contexto_agente_tokens` (80 000; antes 150 000).
 - **Mecanismo:** o agente chega a estado consistente, grava `tasks/{id}/artifacts/{agente}-checkpoint-NN.md` (modelo em `tasks/_TEMPLATE/artifacts/`) e devolve `status: checkpoint` (novo valor do enum do ponteiro, `HANDOFF-PROTOCOL` §3.2). O script delega um agente **novo** do mesmo papel com o mesmo prompt mais o ponteiro do checkpoint; o seguinte não repete leituras já resumidas. Sinal: o hook avisa no limiar (validado dentro de subagente — M3, M7); a regra também está no prompt de todo agente, para o caso de o hook não estar aplicado ou não disparar.
 - **Limite:** `checkpoint.max_por_fatia` (3). Acima disso o script devolve `escalado` para o **Planner**: a fatia está grande demais.
 - **Reviewer e Security-SRE não usam checkpoint.** Estourou → `escopo_excedido: true` (campo opcional do veredito). O script devolve `blocked` em `review` sem consumir rodada e sem nunca aprovar; a sessão principal divide a revisão.
@@ -121,3 +121,22 @@ Linha de base: as últimas fatias executadas antes desta mudança, medidas com o
 | Adesão | `.claude/context-budget.jsonl` (avisos por execução), checkpoints por fatia | avisos caindo entre fatias |
 
 **Regra de decisão:** a mudança só vira definitiva se **nenhuma métrica de qualidade** (rodadas, CRITICAL/HIGH, correções escapadas) piorar. Custo menor com qualidade pior reverte a parte responsável — primeiro os limiares (mais folga), depois o mecanismo. O resultado entra na seção "Revisão" deste ADR com as tasks medidas.
+
+## Adendo 2026-10-31 — releitura de cache
+
+**Medição.** Primeira task real com o fluxo completo (GerenciadorAZ, `2026-10-30_web-gerenciador-vms-nsg-rds` e as seguintes do mesmo dia; 36 subagentes de workflow, transcrições deduplicadas por `message.id`): 16,8 M de releitura. A escrita de cache ficou perto de 1× o contexto final em todos os agentes, ou seja, o cache não quebrou. O custo veio da **releitura**, que é ≈ chamadas × contexto médio:
+
+- dois agentes (Coder e Tester) chegaram a 206k e 168k de contexto e responderam por 3,5 M dos 7 M da primeira task;
+- nas execuções seguintes, agentes de 27–32 chamadas com 48–90k de contexto releram 0,7–1,8 M cada;
+- spec (573 linhas), plano (514) e design (401) eram lidos inteiros por cada agente seguinte (o Tester leu ~34k tokens deles logo no início e os releu em 14 chamadas).
+
+**Causa do limiar de contexto não disparar.** O `context-budget.mjs` procurava a transcrição só em `{sessão}/subagents/agent-{id}.jsonl`; agente de Workflow grava em `{sessão}/subagents/workflows/{run}/agent-{id}.jsonl`. Sem o arquivo, o hook não lia contexto (`"contexto": null` em todo evento do `context-budget.jsonl`) nem faixa da task (todos caíam na `faixa_padrao`). Só o teto de tool calls valia.
+
+**Decisão.**
+
+1. **Hook acha a transcrição de agente de Workflow** (`transcricaoDoAgente`), e o limiar de contexto cai para **80 000** (`praticas/00`). Patch em `docs/patches/context-budget.mjs`, caso novo na suíte (falha na versão em produção, passa na proposta).
+2. **Artefatos de planejamento com teto e índice:** `## Resumo` (até `artefatos.resumo_max_linhas`, 60) e `## Seções por papel`, arquivo até `artefatos.max_linhas` (250); quem lê um artefato de outro papel lê o resumo e a sua seção. Regra no `RULES` do script e no formato dos manuais 01, 02 e 09.
+3. **Coder por grupo em task `complexa`:** o Planner devolve `grupos` de arquivos disjuntos (`HANDOFF-PROTOCOL` §3.2); com mais de um, a rodada 1 roda um Coder por grupo, em sequência (`coder-gNN.md`), e o review lê esses artefatos. A rodada de correção volta a um Coder só, que consolida em `coder.md`. Gate, rodadas e modelos não mudam.
+4. **Menos chamadas:** teto por faixa 12 / 12 / 20 / 30, e regra no `RULES` de agrupar na mesma resposta as chamadas independentes.
+
+**Estimativa** (simulação sobre os 36 agentes medidos, modelo releitura ≈ Σ contexto por chamada, que reproduz 16,2 M contra 16,8 M reais): só (4) −27%; (1)+(4) −37%; (1)+(2)+(4) −45%; cenário pessimista (lote economiza 10% das chamadas, artefatos tiram 6k) −31%. (3) não foi simulado. Checkpoints a mais reescrevem o prefixo de cada agente novo (~10–13k), bem menos do que a releitura evitada. É estimativa: confirma-se pelo plano de "Como medir" acima, com as mesmas métricas de qualidade como trava.
