@@ -3,7 +3,7 @@
 > Complemento operacional de `ARCHITECTURE.md`. Define **como** os agentes trocam trabalho na prática.
 > Regra de ouro: **artifacts são arquivos no disco, não JSON no contexto.** O Orchestrator nunca carrega o conteúdo bruto de um subagente — só referências leves.
 >
-> **Dono:** Tech Lead · **Revisão:** semestral, ou a cada mudança no protocolo · **Última revisão:** 2026-09-29
+> **Dono:** Tech Lead · **Revisão:** semestral, ou a cada mudança no protocolo · **Última revisão:** 2026-11-05
 
 ---
 
@@ -99,7 +99,7 @@ Campos opcionais:
 
   Com `blocking` verdadeiro, o ponteiro também traz `status: blocked` e ao menos um item em `blockers`. Com `blocking: false`, a pergunta não impede o agente de concluir.
 
-**No fluxo por script** (`/task` → `.claude/workflows/playbook-task.js`, `docs/ADR-005`), este bloco é o JSON Schema `POINTER` do script, validado na chamada: o subagente é obrigado a devolver o objeto completo e o modelo tenta de novo se errar o formato. Ponteiro malformado deixa de existir. `provider` e `needs_human` são propriedades **opcionais** do `POINTER` (`docs/ADR-008` §6): o script as repassa nos `events` do agente e, quando o agente bloqueia, devolve `needs_human` no retorno `blocked` — a sessão principal leva a pergunta ao humano e registra a resposta em `decisions.md` (§2.1).
+**No fluxo por script** (`/task` → `.claude/workflows/playbook-task.js`, `docs/ADR-005`), este bloco é o JSON Schema `POINTER` do script, validado na chamada: o subagente é obrigado a devolver o objeto completo e o modelo tenta de novo se errar o formato. Ponteiro malformado deixa de existir. `provider` e `needs_human` são propriedades **opcionais** do `POINTER` (`docs/ADR-008` §6): o script as repassa nos `events` do agente e, quando o agente bloqueia, devolve `needs_human` no retorno `blocked` — a sessão principal leva a pergunta ao humano e registra a resposta em `decisions.md` (§2.1). Só o Planner, em task `complexa`, devolve ainda `grupos` (`[{slug, tasks, files}]`, arquivos disjuntos): com mais de um grupo, a rodada 1 roda um Coder por grupo, em sequência, cada um gravando `coder-gNN.md`; a rodada de correção volta a um Coder só, que consolida o diff em `coder.md` (`docs/ADR-009`, adendo 2026-10-31).
 
 **Sobre `agent` e `model`:** `agent` é sempre o **nome-base** (`coder`, `reviewer`, …) — sem sufixo de modelo — porque os hooks e o `artifact_path` dependem dele. `model` é o modelo em que o subagente efetivamente rodou — o **ID exato** lido no próprio system prompt (`claude-opus-5-5`, `claude-sonnet-5-5`, `claude-fable-5-1`, `claude-haiku-5-5`), não só a família: desde 2026-10-23 (ADR-010) o frontmatter declara a família e um piso de versão, e só o ponteiro registra qual versão de fato rodou. Sufixo de janela de contexto (`claude-opus-5-5[1m]`) é o mesmo modelo — registre como aparece, mas não é divergência. Se estiver fora da família designada ou abaixo do piso (ADR-010), o subagente devolve `status: blocked` com o blocker `"modelo divergente: esperado {X}, rodando em {Y}"` em vez de seguir — assim o downgrade silencioso vira um bloqueio visível no `run-log.md`, não um resultado de qualidade menor passando por aprovado.
 
@@ -200,4 +200,5 @@ Limiares no bloco `orcamento-contexto` de `praticas/00`. Prática: `praticas/12-
 - [ ] Skills checadas (reuso-primeiro); candidates registrados, não criados no meio da task
 - [ ] `artifacts/reviewer.md` existe antes de `done`
 - [ ] Task sensível → `artifacts/security-sre.md` com `APROVADO` antes de `done`
+- [ ] Revisão humana obrigatória ou dado pessoal autorizado → `artifacts/revisao-humana.md` com `APROVADO` e `**Revisor:**` antes de `done`; até lá, o estado é `aguardando_revisao_humana` (`docs/ADR-011`)
 

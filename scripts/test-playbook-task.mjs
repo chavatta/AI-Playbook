@@ -39,7 +39,10 @@ async function run({ args, answers }) {
   const parallel = async (thunks) => { lotes.push(thunks.length); return Promise.all(thunks.map((t) => t().catch(() => null))); };
   let res, err;
   try {
-    res = await body(args, agent, parallel, async () => [], () => {}, () => {}, { total: null }, async () => null);
+    // Os casos anteriores ao ADR-011 testam o gate dos agentes: rodam com revisão humana dispensada.
+    // Caso que quer o valor ausente passa `revisao_humana: undefined` de forma explícita.
+    const a = args && !("revisao_humana" in args) ? { revisao_humana: "dispensada", ...args } : args;
+    res = await body(a, agent, parallel, async () => [], () => {}, () => {}, { total: null }, async () => null);
   } catch (e) { err = e; }
   return { res, err, calls, lotes, labels: calls.map((c) => c.label) };
 }
@@ -255,6 +258,103 @@ const CASES = [
         review: (n) => (n === 1 ? NOK("reviewer") : OK("reviewer")) } },
     (r) => r.res.status === "done" && r.calls.find((c) => c.label === "coder r1").model === undefined
       && r.calls.find((c) => c.label === "coder r2").model === "opus"],
+
+  // ---------- ADR-009, adendo 2026-10-31: releitura ----------
+  ["todo agente recebe a regra de agrupar chamadas e de ler artefato por resumo e seção, com os tetos do perfil",
+    { args: { task_id: T, orcamento: { ...ORC, artefatos: { resumo_max_linhas: 40, max_linhas: 200 } } }, answers: { recon: RECON({ complexity: "trivial" }), coder: PTR("coder"), review: OK("reviewer") } },
+    (r) => r.res.status === "done" && r.calls.every((c) => /MESMA resposta/.test(c.prompt) && /## Seções por papel/.test(c.prompt))
+      && /até 40 linhas/.test(r.calls[0].prompt) && /200 linhas/.test(r.calls[0].prompt)],
+
+  ["task complexa com grupos: um Coder por grupo, em sequência, e o review lê os coder-gNN.md",
+    { args: { task_id: T }, answers: { recon: RECON({ complexity: "complexa" }), design: PTR("architect"),
+        plan: { ...PTR("planner"), grupos: [{ slug: "api", tasks: ["task-001"], files: ["a.ts"] }, { slug: "ui", tasks: ["task-002"], files: ["b.ts"] }] },
+        coder: PTR("coder"), tester: PTR("tester"), review: OK("reviewer") } },
+    (r) => { const cs = r.calls.filter((c) => c.label.startsWith("coder"));
+      const rev = r.calls.find((c) => c.label.startsWith("review"));
+      return r.res.status === "done" && cs.map((c) => c.label).join("|") === "coder r1 · g01|coder r1 · g02"
+        && /coder-g01\.md/.test(cs[0].prompt) && /SÓ o grupo 01 "api"/.test(cs[0].prompt) && /coder-g01\.md/.test(cs[1].prompt)
+        && /coder-g01\.md, .*coder-g02\.md/.test(rev.prompt) && r.calls.find((c) => c.label === "plan").schema.properties.grupos; }],
+
+  ["grupos: Coder de grupo bloqueado para o fluxo antes do grupo seguinte",
+    { args: { task_id: T }, answers: { recon: RECON({ complexity: "complexa" }), design: PTR("architect"),
+        plan: { ...PTR("planner"), grupos: [{ slug: "a", tasks: ["t1"], files: ["a.ts"] }, { slug: "b", tasks: ["t2"], files: ["b.ts"] }] },
+        coder: PTR("coder", "blocked"), tester: PTR("tester") } },
+    (r) => r.res.status === "blocked" && r.res.em === "coder" && !r.labels.includes("coder r1 · g02")],
+
+  ["grupos: rodada 2 é um Coder só, que consolida o diff em coder.md, e o review volta a ler coder.md",
+    { args: { task_id: T }, answers: { recon: RECON({ complexity: "complexa" }), design: PTR("architect"),
+        plan: { ...PTR("planner"), grupos: [{ slug: "a", tasks: ["t1"], files: ["a.ts"] }, { slug: "b", tasks: ["t2"], files: ["b.ts"] }] },
+        coder: PTR("coder"), tester: PTR("tester"), review: (n) => (n === 1 ? NOK("reviewer") : OK("reviewer")) } },
+    (r) => { const c2 = r.calls.find((c) => c.label === "coder r2"); const revs = r.calls.filter((c) => c.label.startsWith("review"));
+      return r.res.status === "done" && c2 && /TODOS os grupos/.test(c2.prompt)
+        && /coder-g02\.md/.test(revs[0].prompt) && /artifacts\/coder\.md\./.test(revs[1].prompt) && !/coder-g0/.test(revs[1].prompt); }],
+
+  ["task não complexa: um Coder, planner sem campo de grupos",
+    { args: { task_id: T }, answers: { recon: RECON(), design: PTR("architect"), plan: PTR("planner"), coder: PTR("coder"), tester: PTR("tester"), review: OK("reviewer") } },
+    (r) => r.res.status === "done" && r.labels.includes("coder r1") && !r.calls.find((c) => c.label === "plan").schema.properties.grupos],
+
+  ["task complexa com um grupo só: um Coder em coder.md",
+    { args: { task_id: T }, answers: { recon: RECON({ complexity: "complexa" }), design: PTR("architect"),
+        plan: { ...PTR("planner"), grupos: [{ slug: "tudo", tasks: ["t1"], files: ["a.ts"] }] }, coder: PTR("coder"), tester: PTR("tester"), review: OK("reviewer") } },
+    (r) => r.res.status === "done" && r.labels.includes("coder r1") && /artifacts\/coder\.md\./.test(r.calls.find((c) => c.label.startsWith("review")).prompt)],
+
+  // ---------- ADR-011: revisão humana e dado pessoal autorizado ----------
+  ["revisão humana obrigatória: aprovado → aguardando_revisao_humana, nunca done",
+    { args: { task_id: T, revisao_humana: "obrigatoria" }, answers: { recon: RECON({ complexity: "trivial" }), coder: PTR("coder"), review: OK("reviewer") } },
+    (r) => r.res.status === "aguardando_revisao_humana" && r.res.revisao_humana === "obrigatoria"
+      && /\/task aprovar 2026-09-23_smoke/.test(r.res.next) && /revisao-humana\.md/.test(r.res.next)],
+
+  ["revisão humana ausente → obrigatória (fail-safe)",
+    { args: { task_id: T, revisao_humana: undefined }, answers: { recon: RECON({ complexity: "trivial" }), coder: PTR("coder"), review: OK("reviewer") } },
+    (r) => r.res.status === "aguardando_revisao_humana" && r.res.revisao_humana === "obrigatoria"],
+
+  ["revisão humana com valor desconhecido → obrigatória",
+    { args: { task_id: T, revisao_humana: "talvez" }, answers: { recon: RECON({ complexity: "trivial" }), coder: PTR("coder"), review: OK("reviewer") } },
+    (r) => r.res.status === "aguardando_revisao_humana"],
+
+  ["revisão humana dispensada → done, campo no retorno",
+    { args: { task_id: T, revisao_humana: "dispensada" }, answers: { recon: RECON({ complexity: "trivial" }), coder: PTR("coder"), review: OK("reviewer") } },
+    (r) => r.res.status === "done" && r.res.revisao_humana === "dispensada"],
+
+  ["revisão humana obrigatória não muda reprovação: 2× REPROVADO → escalado",
+    { args: { task_id: T, revisao_humana: "obrigatoria" }, answers: { recon: RECON(), design: PTR("architect"), plan: PTR("planner"), coder: PTR("coder"), tester: PTR("tester"), review: NOK("reviewer") } },
+    (r) => r.res.status === "escalado" && r.res.revisao_humana === "obrigatoria"],
+
+  ["revisão humana obrigatória não muda divergência do refutador cego",
+    { args: { task_id: T, sensitive: true, revisao_humana: "obrigatoria" }, answers: {
+        recon: RECON({ complexity: "trivial" }), coder: PTR("coder"),
+        "lente: correção": OK("reviewer"), "lente: segurança": OK("security-sre"), "lente: reprodução": OK("tester"), "refutador cego": NOK("reviewer") } },
+    (r) => r.res.status === "divergencia"],
+
+  ["dado pessoal autorizado: sensível, revisão forçada mesmo com dispensada, 3 lentes + cego",
+    { args: { task_id: T, revisao_humana: "dispensada", dados_pessoais: "docs/autorizacoes/acme-2026-09-01.md" }, answers: {
+        recon: RECON({ complexity: "trivial" }), coder: PTR("coder"),
+        "lente: correção": OK("reviewer"), "lente: segurança": OK("security-sre"), "lente: reprodução": OK("tester"), "refutador cego": OK("reviewer") } },
+    (r) => r.res.status === "aguardando_revisao_humana" && r.res.sensitive === true && r.res.revisao_humana === "obrigatoria"
+      && r.labels.includes("lente: segurança") && r.labels.includes("refutador cego")
+      && r.calls.find((c) => c.label === "coder r1").model === "opus"],
+
+  ["dado pessoal autorizado: todo agente recebe a regra e o registro, só depois de '## Esta task'",
+    { args: { task_id: T, dados_pessoais: "docs/autorizacoes/acme-2026-09-01.md" }, answers: {
+        recon: RECON({ complexity: "trivial" }), coder: PTR("coder"),
+        "lente: correção": OK("reviewer"), "lente: segurança": OK("security-sre"), "lente: reprodução": OK("tester"), "refutador cego": OK("reviewer") } },
+    (r) => r.calls.every((c) => {
+      const i = c.prompt.indexOf("## Esta task");
+      const j = c.prompt.indexOf("docs/autorizacoes/acme-2026-09-01.md");
+      return i >= 0 && j > i && /nunca grave dado pessoal em artifact/.test(c.prompt) && /art\. 5º II/.test(c.prompt);
+    })],
+
+  ["sem dado pessoal: prompt não fala de autorização (prefixo e corpo intactos)",
+    { args: { task_id: T }, answers: { recon: RECON({ complexity: "trivial" }), coder: PTR("coder"), review: OK("reviewer") } },
+    (r) => r.calls.every((c) => !/docs\/autorizacoes|Dado pessoal autorizado/.test(c.prompt))],
+
+  ["dados_pessoais vazio é ignorado",
+    { args: { task_id: T, dados_pessoais: "  " }, answers: { recon: RECON({ complexity: "trivial" }), coder: PTR("coder"), review: OK("reviewer") } },
+    (r) => r.res.status === "done" && r.res.sensitive === false],
+
+  ["erro no meio do fluxo: blocked também carrega revisao_humana",
+    { args: { task_id: T, revisao_humana: "obrigatoria" }, answers: { recon: RECON(), design: null } },
+    (r) => r.res.status === "blocked" && r.res.revisao_humana === "obrigatoria"],
 
   // ---------- ADR-010, pendência 8: Security-SRE pelo plano, por chamada ----------
   ...[["pro", "opus"], ["team-standard", "opus"], ["enterprise-standard", "opus"],

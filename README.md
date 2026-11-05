@@ -40,7 +40,7 @@ AI-Playbook/
 │   ├── quiet/                     # test-quiet, lint-quiet, analise-quiet: só falhas e resumo (praticas/12)
 │   └── telemetria/                # Relatório de custos: custo por tipo em dólar, razão de cache, cache quebrado
 ├── docs/
-│   ├── ADR-001-modelos-por-agente.md … ADR-010-familias-e-esforco-por-agente.md
+│   ├── ADR-001-modelos-por-agente.md … ADR-011-revisao-humana-e-dados-pessoais-autorizados.md
 │   ├── ISO-MAPPING.md             # Rastreabilidade ISO 27001 / ISO 42001 → evidência → status
 │   ├── EVIDENCIAS-E-METRICAS.md   # Retenção de evidência, métricas do playbook, cadência de revisão
 │   ├── COMPETENCIA.md             # Registro de quem leu o onboarding e quando (ISO 42001 A.4.6)

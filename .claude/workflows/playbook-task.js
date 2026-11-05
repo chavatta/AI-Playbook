@@ -10,6 +10,9 @@
 // no que varia (task_id, caminhos, issues, checkpoint) — prefixo igual entre agentes do mesmo tipo é
 // releitura de cache, não escrita. Os limiares vêm de args.orcamento (bloco orcamento-contexto de
 // praticas/00, lido pela skill /task); o script não lê disco.
+// Releitura (adendo 2026-10-31 do ADR-009): o custo é contexto × chamadas. Por isso o agente agrupa chamadas
+// independentes na mesma resposta, lê artefato de outro papel pelo resumo e pela sua seção, e task complexa
+// com grupos de arquivos disjuntos ganha um Coder por grupo, cada um com contexto pequeno.
 
 export const meta = {
   name: 'playbook-task',
@@ -115,6 +118,26 @@ const VERDICT = {
     escopo_excedido: { type: 'boolean', description: 'opcional (ADR-009): o review estourou o orçamento de contexto; o escopo precisa ser dividido. Nunca é aprovação.' },
   },
 }
+// Ponteiro do Planner em task complexa: o mesmo contrato + os grupos de arquivos disjuntos que viram um Coder cada.
+const PLANNER_POINTER = {
+  ...POINTER,
+  properties: {
+    ...POINTER.properties,
+    grupos: {
+      type: 'array',
+      description: 'só em task complexa: grupos de tasks com arquivos disjuntos, na ordem de execução; um grupo = um Coder. Vazio ou 1 grupo = um Coder só',
+      items: {
+        type: 'object',
+        required: ['slug', 'tasks', 'files'],
+        properties: {
+          slug: { type: 'string' },
+          tasks: { type: 'array', items: { type: 'string' }, description: 'ids das tasks do planner.md (task-001…)' },
+          files: { type: 'array', items: { type: 'string' } },
+        },
+      },
+    },
+  },
+}
 const SLICES = {
   type: 'object',
   required: ['slices'],
@@ -148,8 +171,12 @@ const limiarTxt = (() => {
     s.leitura_max_linhas_sem_justificativa ? `não leia arquivo inteiro acima de ${s.leitura_max_linhas_sem_justificativa} linhas sem justificativa; saída acima de ${s.saida_para_arquivo_linhas || 150} linhas vai para arquivo em artifacts/` : '',
   ].filter(Boolean).join('; ')
 })()
+const ART = O.artefatos || {}
+const ART_RESUMO = Number.isInteger(ART.resumo_max_linhas) ? ART.resumo_max_linhas : 60
+const ART_MAX = Number.isInteger(ART.max_linhas) ? ART.max_linhas : 250
 const RULES = `Regras (GOVERNANCE.md §3, §4, §7): opere só no seu escopo; grave TODO o conteúdo no artifact indicado (formato do seu manual em multi-agents/agents/) e devolva SÓ o objeto estruturado pedido; um dono por arquivo; nunca coloque dado real de cliente ou pessoal no artifact; confirme no seu system prompt o modelo que te alimenta e declare-o.
 Contexto (praticas/12, docs/ADR-009): busque (rg/grep) antes de ler e leia por faixa de linhas; teste, lint e análise estática só no modo quiet (scripts/quiet/, só falhas e resumo); nunca traga log completo, lockfile, arquivo gerado, minificado ou binário para o contexto; não edite CLAUDE.md, definições de agente nem o contexto da fatia durante a execução — mudança de contexto vira arquivo novo; ${limiarTxt}.
+Releitura: cada resposta sua relê todo o contexto, então agrupe na MESMA resposta as chamadas que não dependem uma da outra (várias leituras, buscas, rg) em vez de uma por vez. Artefato de outro papel (spec, design, plano): leia o "## Resumo" e só as seções que o índice "## Seções por papel" aponta para você; o arquivo inteiro só com justificativa. Artefato que você grava abre com "## Resumo" (até ${ART_RESUMO} linhas) e "## Seções por papel" (papel → seções), e não passa de ${ART_MAX} linhas — acima disso, divida em arquivos citados no resumo.
 Checkpoint (executores; Reviewer e Security-SRE não usam): ao atingir o limiar, chegue a estado consistente (código compilando, ou mudança pequena isolada e anotada), grave artifacts/{agente}-checkpoint-NN.md pelo modelo de tasks/_TEMPLATE/ e devolva o ponteiro com status "checkpoint" e artifact_path apontando para ele.`
 
 // A parte que varia vem por último: task, caminhos e instruções da vez.
@@ -163,7 +190,9 @@ Você é o ${lens} (multi-agents/agents/${manual}). Revise o diff da task — os
 A PRIMEIRA LINHA do artifact é exatamente "**Veredito:** APROVADO" ou "**Veredito:** REPROVADO (n issues)" — o hook check-reviewer-gate.mjs depende disso; não use a palavra APROVADO em nenhum outro trecho.
 Qualquer issue CRITICAL ou HIGH ⇒ REPROVADO. Não existe "aprovado com ressalvas".
 Se o escopo não couber no seu orçamento de contexto, não aprove por amostragem: devolva escopo_excedido: true com aprovado: false, e o orquestrador divide a revisão.
-${daTask(`Diff: files_changed de ${DIR}/artifacts/coder.md. Grave em ${DIR}/artifacts/${artifact}.`)}`
+${daTask(`Diff: ${diffRef}. Grave em ${DIR}/artifacts/${artifact}.`)}`
+// Onde está o diff: coder.md, ou os coder-gNN.md quando a rodada 1 rodou um Coder por grupo.
+let diffRef = `files_changed de ${DIR}/artifacts/coder.md`
 
 // Campos opcionais do ponteiro que a sessão principal precisa ver: onde o agente rodou e se pede decisão humana.
 // Vão nos events e no retorno de blocked; nenhum deles muda o roteamento — quem decide o que fazer é a sessão principal.
@@ -240,6 +269,7 @@ ${daTask(`Grave em ${DIR}/artifacts/planner.md.`)}`,
   }
 
   // ---------- Plan: só quando não é trivial ----------
+  let grupos = null   // task complexa com grupos disjuntos: um Coder por grupo na rodada 1
   if (recon.complexity !== 'trivial') {
     phase('Plan')
     if (recon.needs_spec) {
@@ -255,11 +285,14 @@ ${daTask(`${recon.needs_spec ? `Use também a spec (${DIR}/artifacts/spec-writer
       { agentType: 'architect-opus', phase: 'Plan', label: 'design' })
     if (parou(a)) return saida('architect', a)
 
+    const complexa = recon.complexity === 'complexa'
     const p = await pointer('planner', `${RULES}
-Você é o Planner (multi-agents/agents/02-planner.md). Decomponha o design em tarefas sequenciadas com critérios de aceitação.
+Você é o Planner (multi-agents/agents/02-planner.md). Decomponha o design em tarefas sequenciadas com critérios de aceitação.${complexa ? `
+Task complexa: agrupe as tarefas em grupos com arquivos DISJUNTOS, na ordem de execução, e devolva-os em "grupos" — cada grupo vira um Coder com contexto próprio. Um grupo só quando a mudança não se divide.` : ''}
 ${daTask(`Design: ${DIR}/artifacts/architect.md. Grave em ${DIR}/artifacts/planner.md.`)}`,
-      { agentType: 'planner-sonnet', phase: 'Plan', label: 'plan' })
+      { agentType: 'planner-sonnet', phase: 'Plan', label: 'plan', ...(complexa ? { schema: PLANNER_POINTER } : {}) })
     if (parou(p)) return saida('planner', p)
+    if (complexa && Array.isArray(p.grupos) && p.grupos.length > 1) grupos = p.grupos
   }
 
   // ---------- P2: loop com teto ----------
@@ -279,11 +312,36 @@ ${daTask(`Design: ${DIR}/artifacts/architect.md. Grave em ${DIR}/artifacts/plann
     const testOwner = testerRuns
       ? 'Não escreva testes — o Tester faz isso em paralelo.'
       : 'O Tester não roda nesta rodada: se a mudança pede teste, ou se algum issue aponta arquivo de teste, o dono é você.'
-    const jobs = [
-      () => pointer('coder', `${RULES}
+    const coderOpts = (label) => ({ agentType: 'coder-sonnet', phase: 'Code', label, ...(escalaCoder ? { model: 'opus' } : {}) })
+    const coderPrompt = (onde, escopo) => `${RULES}
 Você é o Coder (multi-agents/agents/03-coder.md). Implemente a task conforme o plano e grave o artifact com files_changed completo.
-${daTask(`Plano: ${recon.complexity === 'trivial' ? 'o brief' : `${DIR}/artifacts/planner.md`}. ${testOwner} Grave em ${DIR}/artifacts/coder.md.${fix}`)}`,
-        { agentType: 'coder-sonnet', phase: 'Code', label: `coder r${round}`, ...(escalaCoder ? { model: 'opus' } : {}) }),
+${daTask(`Plano: ${recon.complexity === 'trivial' ? 'o brief' : `${DIR}/artifacts/planner.md`}. ${testOwner}${escopo} Grave em ${DIR}/artifacts/${onde}.${fix}`)}`
+    // Rodada 1 de task complexa com grupos: um Coder por grupo, em sequência (o grupo seguinte pode usar a
+    // interface do anterior). Contexto pequeno por agente em vez de um agente com o diff inteiro (ADR-009).
+    // Rodada > 1: um Coder só corrige os issues e consolida o diff em coder.md.
+    const porGrupo = grupos && round === 1
+    if (grupos && round > 1) diffRef = `files_changed de ${DIR}/artifacts/coder.md`
+    const consolida = grupos && round > 1
+      ? ' A rodada 1 rodou um Coder por grupo (coder-gNN.md): grave coder.md com files_changed de TODOS os grupos mais as suas correções.'
+      : ''
+    const jobs = [porGrupo
+      ? async () => {
+          const feitos = []
+          let c = null
+          for (let i = 0; i < grupos.length; i++) {
+            const g = grupos[i]
+            const nn = String(i + 1).padStart(2, '0')
+            const antes = feitos.length ? ` Grupos anteriores gravaram ${feitos.join(', ')} — leia o resumo deles só se precisar de uma interface.` : ''
+            c = await pointer('coder', coderPrompt(`coder-g${nn}.md`,
+              ` Você implementa SÓ o grupo ${nn} "${g.slug}" (tasks ${g.tasks.join(', ')}; arquivos ${g.files.join(', ')}); os outros grupos são de outros Coders.${antes}`),
+              coderOpts(`coder r${round} · g${nn}`))
+            if (parou(c)) return c
+            feitos.push(`${DIR}/artifacts/coder-g${nn}.md`)
+          }
+          diffRef = `files_changed de ${feitos.join(', ')}`
+          return c
+        }
+      : () => pointer('coder', coderPrompt('coder.md', consolida), coderOpts(`coder r${round}`)),
     ]
     if (testerRuns) {
       jobs.push(() => pointer('tester', `${RULES}
@@ -354,7 +412,7 @@ ${daTask(`Grave em ${DIR}/artifacts/tester.md.`)}`,
 Você é um Reviewer INDEPENDENTE (multi-agents/agents/04-reviewer.md). NÃO leia reviewer.md, security-sre.md nem tester-review.md da task — você não pode ser ancorado por veredito anterior.
 Leia só o brief e o diff (files_changed do artifact do Coder). Sua missão é REFUTAR a aprovação: procure o defeito que passou. Em dúvida, reprove.
 Primeira linha do artifact: "**Veredito:** APROVADO" ou "**Veredito:** REPROVADO (n issues)".
-${daTask(`Diff: files_changed de ${DIR}/artifacts/coder.md. Grave em ${DIR}/artifacts/reviewer-cego.md.`)}`,
+${daTask(`Diff: ${diffRef}. Grave em ${DIR}/artifacts/reviewer-cego.md.`)}`,
       { agentType: 'reviewer-opus', schema: VERDICT, phase: 'Review', label: 'refutador cego', effort: 'high' })
     // Fail-closed: sem retorno do refutador, a aprovação não foi contra-verificada — não é `done`.
     if (!blind) {

@@ -16,16 +16,16 @@
 // Estado (contagem por agente): diretório temporário do sistema. Registro de avisos: .claude/context-budget.jsonl
 // (fora do git). Só módulos node:, Node ≥ 18.
 
-import { readFileSync, writeFileSync, appendFileSync, mkdirSync, openSync, readSync, fstatSync, closeSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, appendFileSync, mkdirSync, openSync, readSync, fstatSync, closeSync, existsSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { tmpdir } from "node:os";
 import { pathToFileURL } from "node:url";
 
 const DEFAULTS = {
   checkpoint: {
-    tool_calls_por_faixa: { trivial: 15, simples: 15, media: 30, complexa: 50 },
+    tool_calls_por_faixa: { trivial: 12, simples: 12, media: 20, complexa: 30 },
     faixa_padrao: "media",
-    contexto_agente_tokens: 150000,
+    contexto_agente_tokens: 80000,
     lembrete_a_cada_tool_calls: 10,
   },
   sessao_orquestrador: { contexto_max_tokens: 250000 },
@@ -109,6 +109,22 @@ export function contextoAtual(texto) {
   return null;
 }
 
+// Transcrição do subagente. Agente do Task fica em {sessão}/subagents/agent-{id}.jsonl; agente de Workflow, em
+// {sessão}/subagents/workflows/{run}/agent-{id}.jsonl. Sem achar o arquivo, o hook não lia contexto nem faixa e
+// só o teto de tool calls da faixa padrão valia (ADR-009, adendo 2026-10-31).
+export function transcricaoDoAgente(transcriptPath, sessao, agente) {
+  const base = join(dirname(transcriptPath), String(sessao), "subagents");
+  const nome = `agent-${agente}.jsonl`;
+  if (existsSync(join(base, nome))) return join(base, nome);
+  try {
+    for (const run of readdirSync(join(base, "workflows"))) {
+      const p = join(base, "workflows", run, nome);
+      if (existsSync(p)) return p;
+    }
+  } catch { /* sem workflows */ }
+  return null;
+}
+
 // Faixa de complexidade da task que o subagente atende: task_id no primeiro prompt → recon/brief.
 export function faixaDaTask(primeiroPrompt, cwd) {
   const m = /tasks\/(\d{4}-\d{2}-\d{2}_[a-z0-9][a-z0-9-]*)\//.exec(primeiroPrompt || "");
@@ -164,9 +180,8 @@ function main() {
 
   if (agente) {
     // 2. subagente: checkpoint por tool calls e por contexto
-    const transcricao = j.transcript_path
-      ? join(dirname(j.transcript_path), String(j.session_id), "subagents", `agent-${agente}.jsonl`)
-      : null;
+    if (!a.tr && j.transcript_path) a.tr = transcricaoDoAgente(j.transcript_path, j.session_id, agente);
+    const transcricao = a.tr || null;
     if (a.faixa === null && transcricao) {
       try { a.faixa = faixaDaTask(lerTrecho(transcricao, false, 65536), cwd) || ""; } catch { a.faixa = ""; }
     }

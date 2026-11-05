@@ -260,9 +260,9 @@ Detalhes: `HANDOFF-PROTOCOL.md` §7.1. Disciplina de saída de ferramenta: `prat
 
 | Complexidade da Task | Agentes Ativos | Tool Calls Esperados |
 |---------------------|----------------|---------------------|
-| Simples (bug fix, small change) | 2–3 | 5–15 por agente |
-| Média (nova feature pequena) | 3–5 | 10–30 por agente |
-| Complexa (sistema novo, refactor grande) | 5–8 | 20–50 por agente |
+| Simples (bug fix, small change) | 2–3 | 5–12 por agente |
+| Média (nova feature pequena) | 3–5 | 10–20 por agente |
+| Complexa (sistema novo, refactor grande) | 5–8 | 15–30 por agente; trabalho maior vira um Coder por grupo de arquivos |
 | Épica (arquitetura de produto) | Planner (fatiar) | Nenhum na task-mãe — cada fatia é uma `/task` própria |
 
 O teto de tool calls de cada faixa é também o limiar de checkpoint do agente (`checkpoint.tool_calls_por_faixa` em `praticas/00`); o número vale do perfil do projeto, não desta tabela.

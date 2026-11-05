@@ -6,7 +6,7 @@
 >
 > Este documento é o método de trabalho do agente **Security-SRE** (`multi-agents/agents/12-security-sre.md`) e a referência de segurança do DevOps e do Reviewer.
 >
-> **Dono:** Tech Lead · **Revisão:** trimestral · **Última revisão:** 2026-09-23
+> **Dono:** Tech Lead · **Revisão:** trimestral · **Última revisão:** 2026-11-05
 
 ---
 
@@ -121,7 +121,7 @@ Todo controle acima protege o sistema; a LGPD (Lei 13.709/2018) protege o **titu
 6. **Compartilhamento com terceiros** — inclui provedores de IA/LLM e ferramentas SaaS: dado pessoal em prompt enviado a provedor externo é transferência de dado, e precisa de base legal e contrato (DPA).
 7. **Incidente com dado pessoal** — além do runbook técnico: avaliar risco ao titular e comunicar ANPD e titulares quando aplicável (art. 48). Quem decide é o encarregado (DPO)/Tech Lead, não o dev.
 
-Regra prática para agentes e devs: **dado pessoal real nunca entra em prompt, fixture, log ou ambiente de teste** — use dado sintético ou anonimizado.
+Regra prática para agentes e devs: **dado pessoal real nunca entra em fixture, log, artifact ou ambiente de teste** — use dado sintético ou anonimizado. **Em prompt**, só dado pessoal comum com autorização vigente do cliente e as condições de `praticas/10` §3 e §3.1 (`docs/ADR-011`); sensível e de menores, nunca.
 
 ---
 
