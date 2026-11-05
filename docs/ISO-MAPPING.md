@@ -4,7 +4,7 @@
 >
 > Este é o documento que se entrega ao auditor (interno ou de certificação). Ele **não** é um SGSI nem um SGIA — ver `docs/ADR-004-conformidade-iso.md` para o enquadramento e as fronteiras.
 >
-> **Dono:** Tech Lead · **Revisão:** semestral, ou a cada mudança em `GOVERNANCE.md` · **Última revisão:** 2026-09-23
+> **Dono:** Tech Lead · **Revisão:** semestral, ou a cada mudança em `GOVERNANCE.md` · **Última revisão:** 2026-11-05
 
 ---
 
@@ -44,7 +44,7 @@ Escopo desta tabela: os controles com relação direta com o ciclo de vida de de
 | **A.5.23** | SI para serviços em nuvem | PARCIAL | `praticas/05-kubernetes-eks.md` e `praticas/06` camada 4 (CSPM, IAM); depende de `praticas/00` preenchido |
 | **A.5.24–5.28** | Gestão de incidentes de SI | OK | `praticas/06` trata secret commitado como incidente; [`RUNBOOK-INCIDENTE-IA.md`](RUNBOOK-INCIDENTE-IA.md) cobre os três cenários específicos de IA com detecção, contenção, comunicação e aprendizado |
 | **A.5.31** | Requisitos legais e contratuais | OK | `praticas/06` seção LGPD — base legal, direitos do titular, art. 48 |
-| **A.5.34** | Privacidade e proteção de PII | OK | `praticas/06` seção LGPD + `praticas/10` §2: dado pessoal real nunca entra em prompt, fixture, log ou ambiente de teste |
+| **A.5.34** | Privacidade e proteção de PII | OK | `praticas/06` seção LGPD + `praticas/10` §2 e §3.1: dado pessoal real nunca entra em fixture, log, artifact ou ambiente de teste; em prompt, só dado comum com autorização vigente do cliente registrada em `docs/autorizacoes/` e conferida pelo hook no `done` (`docs/ADR-011`) |
 | **A.5.36** | Conformidade com políticas | OK | Travas mecânicas (§6) — conformidade verificada por hook, não por declaração |
 | **A.5.37** | Procedimentos operacionais documentados | OK | `multi-agents/agents/NN-*.md`, `HANDOFF-PROTOCOL.md`, `ONBOARDING.md` |
 
@@ -131,7 +131,7 @@ A organização tem **duas relações distintas** com IA, e elas caem em partes 
 
 **Resumo 42001:** 22 OK · 8 PARCIAL · 0 LACUNA · 3 ORG.
 
-**Supervisão humana** (A.9.2, e também Art. 14 do EU AI Act, se vier a ser exigido): o playbook atende de forma explícita e mecânica — nenhuma task fecha sem veredito humano-revisável do Reviewer, e o dev que abre o PR assume a responsabilidade. Esse é o ponto mais forte do conjunto perante um auditor.
+**Supervisão humana** (A.9.2, e também Art. 14 do EU AI Act, se vier a ser exigido): o playbook atende de forma explícita e mecânica — nenhuma task fecha sem veredito humano-revisável do Reviewer, e o dev que abre o PR assume a responsabilidade. Onde o projeto define `revisao_humana: obrigatoria` (`praticas/00`, `docs/ADR-011`) — e sempre em task com dado pessoal autorizado —, a revisão humana vira evidência própria: `artifacts/revisao-humana.md` com revisor e data, exigido pelo hook antes do `done`. Com `dispensada`, a evidência de supervisão é o gate dos agentes mais o PR. Esse é o ponto mais forte do conjunto perante um auditor.
 
 ---
 

@@ -6,7 +6,7 @@
 >
 > Este documento é a régua do Analista/Dev e de todos os agentes, e o critério de auditoria do Security-SRE nesse recorte. Complementa `praticas/06-devsecops.md` (seções LGPD e Segurança de sistemas com IA) — aqui está o **como classificar e decidir**; lá está o método de segurança em volta.
 >
-> **Dono:** Tech Lead · **Revisão:** trimestral · **Última revisão:** 2026-08-31
+> **Dono:** Tech Lead · **Revisão:** trimestral · **Última revisão:** 2026-11-05
 
 ---
 
@@ -42,6 +42,18 @@ Dado Confidencial só entra no contexto quando **as três** valem simultaneament
 3. **Minimização** — só o necessário para a tarefa. Um trecho, não o arquivo; um arquivo, não o repositório; schema, não a tabela com linhas reais.
 
 Falhou uma? O dado não entra. Ponto.
+
+### 3.1 Dado pessoal comum: autorização do cliente
+
+Quando o Confidencial é **dado pessoal comum de cliente** (nome, e-mail, CPF, endereço), vale uma quarta condição: **autorização vigente do cliente**, registrada em `docs/autorizacoes/` pelo modelo `multi-agents/templates/AUTORIZACAO-DADOS-PESSOAIS.template.md` (`docs/ADR-011`).
+
+- Na LGPD o cliente costuma ser o **controlador** e nós o **operador**; o provedor de IA é **suboperador**. A autorização é a instrução do controlador para o operador usar esse suboperador. Ela **não substitui** a base legal (art. 7º), o consentimento do titular nem a condição 2 acima.
+- Vale só para a finalidade, as categorias, os sistemas e os provedores escritos no registro, e só até a `Validade`.
+- **Não alcança a classe Restrita.** Dado sensível, de menores e credenciais continuam proibidos, com ou sem autorização.
+- A task declara `Dados pessoais: autorizados — <registro>` no `brief.md`. Isso a torna sensível e exige revisão humana registrada antes de `done`.
+- Mesmo autorizado, o dado passa primeiro pelas saídas da §4: execução local que devolve agregado, depois trecho mínimo. E **nunca** vai para artifact, run-log, fixture, teste, log ou commit.
+
+Sem registro vigente, dado pessoal real não entra no contexto.
 
 **Quem decide em caso de dúvida:** o Analista/Dev classifica; dúvida entre Confidencial e Restrito sobe ao Tech Lead **antes** do envio, nunca depois. Na dúvida não resolvida, trate como a classe mais alta.
 
@@ -98,7 +110,7 @@ Sem cultura punitiva: quem reporta rápido reduz o dano. Quem esconde transforma
 
 ## 8. Como isso aparece no fluxo
 
-- **`brief.md`** — o Orchestrator declara a **classe de dado** da task junto com o marcador de sensibilidade. Task Confidencial ou Restrita é automaticamente sensível (gate do Security-SRE).
+- **`brief.md`** — o Orchestrator declara a **classe de dado** da task junto com o marcador de sensibilidade. Task Confidencial ou Restrita é automaticamente sensível (gate do Security-SRE). Dado pessoal autorizado (§3.1) vai no campo `Dados pessoais`, com o caminho do registro; a skill `/task` confere o registro antes de abrir a task, e o hook confere a validade no `done`.
 - **Coder / Data-Engineer** — não colam dado real em prompt, fixture, log ou ambiente de teste; usam sintético.
 - **AI-Engineer** — a feature que constrói herda estas regras para os **usuários finais** dela: o que o usuário pode mandar para o modelo, e o que o RAG pode recuperar, é decisão de design documentada na avaliação de impacto.
 - **Security-SRE** — audita esta classificação no gate de task sensível.
@@ -110,6 +122,7 @@ Sem cultura punitiva: quem reporta rápido reduz o dano. Quem esconde transforma
 
 - [ ] Sei qual é a classe do dado mais sensível deste conteúdo?
 - [ ] Se Confidencial: ferramental aprovado, contrato verificado e minimizado?
+- [ ] Se for dado pessoal comum: há autorização vigente do cliente que cubra esta finalidade (§3.1)?
 - [ ] Se Restrito: parei e usei uma saída da §4?
 - [ ] Há credencial, token ou chave escondida em config, comentário ou histórico colado junto?
 - [ ] Consigo resolver com schema/estrutura em vez de valores reais?

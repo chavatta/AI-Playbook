@@ -6,7 +6,7 @@
 >
 > **Preenchido por projeto, não uma vez pela organização.** Cada repo que adota o playbook carrega o seu 00 e o preenche no início (`ONBOARDING.md §2`, passo 6) — dois projetos da organização podem ter stacks legitimamente diferentes.
 >
-> **Dono:** Tech Lead · **Revisão:** trimestral · **Última revisão:** 2026-09-23
+> **Dono:** Tech Lead · **Revisão:** trimestral · **Última revisão:** 2026-11-05
 
 ## Campo em branco não é blocker — é um menu
 
@@ -69,7 +69,7 @@ Escolhida a opção (ou delegada ao Architect), a decisão vira **ADR** e o valo
 |---|---|---|---|
 | Provedor/modelos 🔒 | **Anthropic — famílias Opus / Sonnet / Haiku / Fable, pisos 5.5 / 5.5 / 5.5 / 5.1** (ADR-010) | ★ **Anthropic** · outro provedor | Trocar exige revisar ADR-001/002/003/010 e a designação de família dos 13 agentes. Fora da API da Anthropic, os aliases resolvem para versões mais antigas e o piso bloqueia os agentes |
 | Contrato/DPA 🔒 | **Plano de subscrição — ⚠️ classe a confirmar (ver nota abaixo)** | Comercial (Team / Enterprise / API) · Consumidor (Pro / Max) | O DPA da Anthropic é **incorporado automaticamente aos Termos Comerciais**, com SCCs — não exige assinatura separada. Planos de consumidor **não** são cobertos por ele |
-| Dados em prompt | Dado pessoal real **nunca**; fixture sintética por seed é a única fonte em desenvolvimento | *(decidido — sem menu)* | Ver seção LGPD do [06](06-devsecops.md). Verificação no CI: `gitleaks` (segredo) **+** check de padrão de PII sobre fixtures e seeds — somatório, não alternativa |
+| Dados em prompt | Dado pessoal real **só com autorização vigente do cliente** e só dado comum ([10](10-dados-e-contexto-de-ia.md) §3.1, `docs/ADR-011`); sensível, de menores e credenciais **nunca**. Fixture sintética por seed continua a única fonte em teste e desenvolvimento | *(decidido — sem menu)* | Ver seção LGPD do [06](06-devsecops.md). Verificação no CI: `gitleaks` (segredo) **+** check de padrão de PII sobre fixtures e seeds — somatório, não alternativa |
 | Framework de agentes/RAG | `{...}` | ★ **SDK do provedor, direto** · framework de orquestração (LangGraph, LlamaIndex) | ★ é o "padrão mínimo que atende" do manual do AI-Engineer. Framework entra quando o SDK direto já não dá conta — via ADR do Architect, não por antecipação |
 | Orquestração do **fluxo de desenvolvimento** | **Nativa do Claude Code** — Workflow (`.claude/workflows/playbook-task.js`) + subagentes + hooks, na assinatura | *(decidido — `docs/ADR-005`; sem menu)* | Automação **fora** do Claude Code (LangGraph, Agent SDK, `claude -p` em servidor) exige API key e ADR: a assinatura cobre uso ordinário do produto, não orquestração externa (legal e compliance do Claude Code). Framework de agentes acima é para o **produto**; esta linha é para o **processo** |
 
@@ -91,6 +91,24 @@ Escolhida a opção (ou delegada ao Architect), a decisão vira **ADR** e o valo
 > **Encaminhamento recomendado:** confirmar o plano no Console (Billing). Se for consumidor, migrar para Claude for Work (Team) — é o que faz o DPA valer e devolve controle de administrador. Feito isso, substituir o valor deste campo por algo verificável, no formato: `Claude for Work Team · DPA incorporado aos Termos Comerciais aceitos em AAAA-MM-DD · cópia em docs/contratos/`.
 >
 > A base legal de transferência internacional sob a LGPD (cap. V) é pergunta para o jurídico, não para o Tech Lead — o DPA traz SCCs em formato europeu.
+
+---
+
+## Perfil do fluxo
+
+Parâmetros do projeto que a skill `/task` lê e passa ao `playbook-task.js` (`docs/ADR-011`). O bloco JSON abaixo é **a única fonte** deles: a skill o lê pelos marcadores, então não mude o formato nem os marcadores.
+
+<!-- perfil-fluxo:inicio -->
+```json
+{
+  "revisao_humana": "obrigatoria"
+}
+```
+<!-- perfil-fluxo:fim -->
+
+| Chave | Valores | Default | O que faz |
+|---|---|---|---|
+| `revisao_humana` | `obrigatoria` · `dispensada` | `obrigatoria` | **obrigatoria:** o fluxo aprovado para em `aguardando_revisao_humana` e só vira `done` com `artifacts/revisao-humana.md` APROVADO e assinado por um revisor (`/task aprovar <task_id>`); o hook bloqueia o `done` sem ele. **dispensada:** o gate dos agentes basta para o `done`. Não dispensa o Reviewer, o Security-SRE, a decisão humana na divergência nem a responsabilidade do dev (`GOVERNANCE.md` §1). Task com dado pessoal autorizado é sempre obrigatória. Com `dispensada`, mantenha a branch protection coerente: exigir aprovação no GitHub e dispensar aqui é contradição, e o GitHub prevalece |
 
 ---
 

@@ -3,7 +3,7 @@
 > Complemento operacional de `ARCHITECTURE.md`. Define **como** os agentes trocam trabalho na prática.
 > Regra de ouro: **artifacts são arquivos no disco, não JSON no contexto.** O Orchestrator nunca carrega o conteúdo bruto de um subagente — só referências leves.
 >
-> **Dono:** Tech Lead · **Revisão:** semestral, ou a cada mudança no protocolo · **Última revisão:** 2026-09-29
+> **Dono:** Tech Lead · **Revisão:** semestral, ou a cada mudança no protocolo · **Última revisão:** 2026-11-05
 
 ---
 
@@ -200,4 +200,5 @@ Limiares no bloco `orcamento-contexto` de `praticas/00`. Prática: `praticas/12-
 - [ ] Skills checadas (reuso-primeiro); candidates registrados, não criados no meio da task
 - [ ] `artifacts/reviewer.md` existe antes de `done`
 - [ ] Task sensível → `artifacts/security-sre.md` com `APROVADO` antes de `done`
+- [ ] Revisão humana obrigatória ou dado pessoal autorizado → `artifacts/revisao-humana.md` com `APROVADO` e `**Revisor:**` antes de `done`; até lá, o estado é `aguardando_revisao_humana` (`docs/ADR-011`)
 
