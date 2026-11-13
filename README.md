@@ -33,6 +33,7 @@ AI-Playbook/
 ├── praticas/                      # Biblioteca de boas práticas (stack do projeto, clean code, clean architecture,
 │                                  #   design funcional, modularização, monorepo, containers, EKS, DevSecOps+LGPD, testes,
 │                                  #   dados e contexto de IA, MCP, disciplina de saída de ferramenta)
+├── gestao/                        # Portal de gestão (padrão em todo projeto, ADR-012): serve.mjs, index.html, projeto.json (template; dado do projeto)
 ├── scripts/
 │   ├── check-pii.sh               # Padrão de PII (CPF, CNPJ, celular) em fixtures/seeds — no CI, ao lado do gitleaks
 │   ├── test-playbook-task.mjs         # Smoke test do fluxo por script, com agentes simulados — sem gastar quota
@@ -40,7 +41,7 @@ AI-Playbook/
 │   ├── quiet/                     # test-quiet, lint-quiet, analise-quiet: só falhas e resumo (praticas/12)
 │   └── telemetria/                # Relatório de custos: custo por tipo em dólar, razão de cache, cache quebrado
 ├── docs/
-│   ├── ADR-001-modelos-por-agente.md … ADR-011-revisao-humana-e-dados-pessoais-autorizados.md
+│   ├── ADR-001-modelos-por-agente.md … ADR-012-portal-de-gestao-padrao.md
 │   ├── ISO-MAPPING.md             # Rastreabilidade ISO 27001 / ISO 42001 → evidência → status
 │   ├── EVIDENCIAS-E-METRICAS.md   # Retenção de evidência, métricas do playbook, cadência de revisão
 │   ├── COMPETENCIA.md             # Registro de quem leu o onboarding e quando (ISO 42001 A.4.6)
@@ -56,7 +57,7 @@ AI-Playbook/
 Copie para a raiz do repo:
 
 ```bash
-cp -R AI-Playbook/.claude AI-Playbook/multi-agents AI-Playbook/praticas AI-Playbook/scripts <repo>/
+cp -R AI-Playbook/.claude AI-Playbook/multi-agents AI-Playbook/praticas AI-Playbook/scripts AI-Playbook/gestao <repo>/
 mkdir -p <repo>/tasks && cp -R AI-Playbook/tasks/_TEMPLATE <repo>/tasks/
 cp -R AI-Playbook/docs <repo>/
 cp AI-Playbook/{README.md,DESENVOLVIMENTO-COM-IA.md,ONBOARDING.md,GOVERNANCE.md} <repo>/
@@ -66,7 +67,7 @@ printf '%s\n' '' '# Spool da telemetria do playbook (docs/ADR-008)' 'tasks/*/tel
 No Windows (PowerShell), o equivalente (`tasks\_TEMPLATE` exige criar `<repo>\tasks` antes):
 
 ```powershell
-Copy-Item -Recurse AI-Playbook\.claude,AI-Playbook\multi-agents,AI-Playbook\praticas,AI-Playbook\scripts,AI-Playbook\docs <repo>\
+Copy-Item -Recurse AI-Playbook\.claude,AI-Playbook\multi-agents,AI-Playbook\praticas,AI-Playbook\scripts,AI-Playbook\gestao,AI-Playbook\docs <repo>\
 New-Item -ItemType Directory -Force <repo>\tasks | Out-Null
 Copy-Item -Recurse AI-Playbook\tasks\_TEMPLATE <repo>\tasks\
 Copy-Item AI-Playbook\README.md,AI-Playbook\DESENVOLVIMENTO-COM-IA.md,AI-Playbook\ONBOARDING.md,AI-Playbook\GOVERNANCE.md <repo>\
@@ -76,6 +77,8 @@ Add-Content <repo>\.gitignore '', '# Spool da telemetria do playbook (docs/ADR-0
 Copia-se `tasks/_TEMPLATE/`, não as tasks deste próprio playbook. A última linha de cada bloco acrescenta ao `.gitignore` do repo os padrões do spool da telemetria ([`docs/telemetria/`](docs/telemetria/README.md)): é fila de envio, não evidência, e são os únicos arquivos de `tasks/` fora do git. No repo adotante, apague `docs/patches/` — são propostas de mudança nas travas *deste* playbook, não do projeto novo — e `docs/COMPETENCIA.md`, que fica só no repo do playbook (registro organizacional, não por projeto).
 
 Depois de copiar, preencha no `praticas/00` o bloco **Orçamento de contexto e execução**: pelo menos `comandos_quiet` (os comandos de teste, lint e análise estática do projeto, que os wrappers `scripts/quiet/*-quiet.mjs` rodam mostrando só falhas e resumo). Os limiares já vêm com default; ajuste por projeto e cite o ADR (`docs/ADR-009`).
+
+O **portal de gestão** (`gestao/`) vai junto: `gestao/projeto.json` chega como template de exemplo — troque por `nome`, fases e pendências reais do projeto (o `playbook-update` nunca o sobrescreve) — e a seção "Portal de gestão" de [`multi-agents/templates/AGENTS.template.md`](multi-agents/templates/AGENTS.template.md) entra no `AGENTS.md` do projeto. Subir: `node gestao/painel.mjs iniciar` em qualquer sistema (guia: [`gestao/README.md`](gestao/README.md); `ONBOARDING.md` §4).
 
 Os hooks são scripts Node (`.mjs`) — funcionam automaticamente em macOS, Linux e Windows, sem `chmod` nem configuração por sistema.
 

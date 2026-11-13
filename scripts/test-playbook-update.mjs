@@ -26,6 +26,7 @@ escreve(projeto, "README.md", "v1");
 escreve(projeto, ".claude/hooks/h.mjs", "v1");
 escreve(projeto, "praticas/00-stack-e-defaults.md", "do projeto");
 escreve(projeto, "tasks/x/brief.md", "meu");
+escreve(projeto, "gestao/projeto.json", "dados do projeto");
 
 const casos = [];
 const caso = (nome, f) => { let ok = false, det = ""; try { const r = f(); ok = r === true; det = ok ? "" : String(r); } catch (e) { det = e.message; } casos.push([nome, ok, det]); };
@@ -39,6 +40,8 @@ escreve(remoto, ".claude/hooks/h.mjs", "v2");
 escreve(remoto, "docs/novo.md", "novo");
 escreve(remoto, "praticas/00-stack-e-defaults.md", "remoto mudou");
 escreve(remoto, "tasks/y/brief.md", "do remoto");
+escreve(remoto, "gestao/projeto.json", "template do remoto");
+escreve(remoto, "gestao/serve.mjs", "portal v2");
 const sha2 = commit("v2");
 
 caso("versão diferente → 10", () => roda("--verificar").status === 10);
@@ -54,6 +57,10 @@ caso("staging traz o arquivo novo", () => readFileSync(join(projeto, ".playbook-
 caso("perfil do projeto e tasks/ ficam fora da comparação", () => {
   const txt = readFileSync(join(projeto, ".playbook-update", sha2.slice(0, 7), "CHANGES.txt"), "utf8");
   return !/00-stack-e-defaults/.test(txt) && !/tasks\//.test(txt);
+});
+caso("gestao/projeto.json é dado do projeto: fora da comparação e nunca sobrescrito; o portal (serve.mjs) entra", () => {
+  const txt = readFileSync(join(projeto, ".playbook-update", sha2.slice(0, 7), "CHANGES.txt"), "utf8");
+  return !/gestao\/projeto\.json/.test(txt) && /A gestao\/serve\.mjs/.test(txt) && readFileSync(join(projeto, "gestao/projeto.json"), "utf8") === "dados do projeto" && !existsSync(join(projeto, ".playbook-update", sha2.slice(0, 7), "arquivos/gestao/projeto.json")) || txt;
 });
 caso("depois de registrar → 0", () => roda("--registrar").status === 0 && roda("--verificar").status === 0);
 caso("remoto inacessível → 12 (não bloqueia)", () => {

@@ -21,6 +21,7 @@
 ## Critérios de sucesso / aceitação
 - [ ] {critério 1}
 - [ ] {critério 2}
+- [ ] `gestao/projeto.json` atualizado na mesma entrega (status, bloqueios com passo a passo, decisões respondidas, pendências, aprovações, `atualizado`) e o ADR da decisão com Status e Decisão/Consequências (`multi-agents/templates/AGENTS.template.md`)
 
 ## Contexto e constraints
 {Decisões anteriores, stack, restrições de GOVERNANCE, repo GitHub, etc.}

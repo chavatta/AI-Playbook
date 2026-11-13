@@ -32,6 +32,14 @@ const CASES = [
     () => roda({ auth: OAUTH({ subscriptionType: "max" }) }),
     (r) => r.code === 0 && r.envOut.PLAYBOOK_PLANO === "max" && !("ANTHROPIC_DEFAULT_FABLE_MODEL" in r.envOut)],
 
+  ["ultra → gravado como max, alias fable intacto",
+    () => roda({ auth: OAUTH({ subscriptionType: "ultra" }) }),
+    (r) => r.code === 0 && r.envOut.PLAYBOOK_PLANO === "max" && !("ANTHROPIC_DEFAULT_FABLE_MODEL" in r.envOut) && /subscriptionType=ultra/.test(r.out)],
+
+  ["--plano ultra → max; limpa o Opus que o pro tinha posto",
+    () => roda({ args: ["--plano", "ultra"], settings: { env: { PLAYBOOK_PLANO: "pro", ANTHROPIC_DEFAULT_FABLE_MODEL: OPUS } } }),
+    (r) => r.code === 0 && r.envOut.PLAYBOOK_PLANO === "max" && !("ANTHROPIC_DEFAULT_FABLE_MODEL" in r.envOut)],
+
   ["pro → alias fable apontado para o Opus",
     () => roda({ auth: OAUTH({ subscriptionType: "pro" }) }),
     (r) => r.code === 0 && r.envOut.PLAYBOOK_PLANO === "pro" && r.envOut.ANTHROPIC_DEFAULT_FABLE_MODEL === OPUS && /crédito avulso/.test(r.out)],
@@ -104,6 +112,50 @@ const CASES = [
   ["--verificar não grava nada",
     () => roda({ args: ["--verificar"], settings: { env: { PLAYBOOK_PLANO: "max" } }, env: { PLAYBOOK_PLANO: "max" } }),
     (r) => r.code === 0 && r.raw === JSON.stringify({ env: { PLAYBOOK_PLANO: "max" } })],
+
+  ["--telemetria: grava spool e o id, sem arquivo prévio",
+    () => roda({ args: ["--telemetria", "--projeto", "meu-proj"] }),
+    (r) => r.code === 0 && r.envOut.PLAYBOOK_TELEMETRY_URL === "spool" && r.envOut.PLAYBOOK_PROJECT_ID === "meu-proj"],
+
+  ["--telemetria preserva as demais chaves (dentro e fora do env)",
+    () => roda({ args: ["--telemetria", "--projeto", "x1"], settings: { env: { PLAYBOOK_PLANO: "pro", ANTHROPIC_DEFAULT_FABLE_MODEL: OPUS }, permissions: { allow: ["Bash(ls)"] } } }),
+    (r) => r.code === 0 && r.envOut.PLAYBOOK_PLANO === "pro" && r.envOut.ANTHROPIC_DEFAULT_FABLE_MODEL === OPUS && r.json.permissions.allow[0] === "Bash(ls)" && r.envOut.PLAYBOOK_TELEMETRY_URL === "spool"],
+
+  ["--telemetria é idempotente: a segunda execução deixa o arquivo igual",
+    () => { const a = roda({ args: ["--telemetria", "--projeto", "x1"] }); const b = roda({ args: ["--telemetria"], settings: a.json }); return { ...b, antes: JSON.stringify(a.json) }; },
+    (r) => r.code === 0 && r.raw === r.antes],
+
+  ["--telemetria sem --projeto mantém o id gravado; com --projeto troca",
+    () => { const a = roda({ args: ["--telemetria"], settings: { env: { PLAYBOOK_PROJECT_ID: "antigo" } } }); const b = roda({ args: ["--telemetria", "--projeto", "novo"], settings: { env: { PLAYBOOK_PROJECT_ID: "antigo" } } }); return { ...a, novo: b.envOut.PLAYBOOK_PROJECT_ID }; },
+    (r) => r.envOut.PLAYBOOK_PROJECT_ID === "antigo" && r.novo === "novo"],
+
+  ["--telemetria sem id e sem --projeto: usa o nome da pasta em kebab-case",
+    () => roda({ args: ["--telemetria"] }),
+    (r) => r.code === 0 && /^[a-z0-9][a-z0-9-]{0,63}$/.test(r.envOut.PLAYBOOK_PROJECT_ID)],
+
+  ["--telemetria com --projeto inválido → sai 2 e não grava",
+    () => roda({ args: ["--telemetria", "--projeto", "Meu Proj!"], settings: { env: { PLAYBOOK_PLANO: "pro" } } }),
+    (r) => r.code === 2 && r.raw === JSON.stringify({ env: { PLAYBOOK_PLANO: "pro" } })],
+
+  ["--telemetria não impõe spool sobre um coletor já configurado",
+    () => roda({ args: ["--telemetria", "--projeto", "x1"], settings: { env: { PLAYBOOK_TELEMETRY_URL: "https://coletor.exemplo/ingest" } } }),
+    (r) => r.code === 0 && r.envOut.PLAYBOOK_TELEMETRY_URL === "https://coletor.exemplo/ingest" && /mantida/.test(r.out)],
+
+  ["--telemetria não toca no plano nem no alias fable",
+    () => roda({ args: ["--telemetria", "--projeto", "x1"] }),
+    (r) => r.code === 0 && !("PLAYBOOK_PLANO" in r.envOut) && !("ANTHROPIC_DEFAULT_FABLE_MODEL" in r.envOut)],
+
+  ["--verificar-telemetria: desligada → sai 1",
+    () => roda({ args: ["--verificar-telemetria"], settings: { env: { PLAYBOOK_PLANO: "pro" } } }),
+    (r) => r.code === 1],
+
+  ["--verificar-telemetria: ligada e sessão em dia → sai 0, sem gravar",
+    () => roda({ args: ["--verificar-telemetria"], settings: { env: { PLAYBOOK_TELEMETRY_URL: "spool" } }, env: { PLAYBOOK_TELEMETRY_URL: "spool" } }),
+    (r) => r.code === 0 && r.raw === JSON.stringify({ env: { PLAYBOOK_TELEMETRY_URL: "spool" } })],
+
+  ["--verificar-telemetria: gravada mas a sessão foi aberta antes → sai 3",
+    () => roda({ args: ["--verificar-telemetria"], settings: { env: { PLAYBOOK_TELEMETRY_URL: "spool" } }, env: { PLAYBOOK_TELEMETRY_URL: "" } }),
+    (r) => r.code === 3],
 ];
 
 let pass = 0;

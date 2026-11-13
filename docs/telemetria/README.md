@@ -22,6 +22,8 @@ Formato comum dos eventos que os hooks do fluxo emitem para um **coletor HTTP op
 - **Linhagem no `run.state`:** `retry_of_run_id`, `resumed_from_run_id` e `continues_run_id` são opcionais, no formato de run id (`run_` mais 26 caracteres Crockford). Campos aditivos na v1: [nota 02 do ADR-008](../ADR-008-nota-02-linhagem-no-run-state.md).
 - **`portal` nos vocabulários** (`source.kind`, `data.task_source`, `error.scope`, `flow.step.origin`, `prompt.submit.origin`) é um **papel**, não um produto. É o orquestrador ou painel que lança as execuções e recebe os eventos, no mesmo nível de `hook`, `adapter`, `indexer` e `collector`. Neste documento e no ADR-008, esse papel se chama "orquestrador".
 
+- **Consumidor: `task_id` e agente podem faltar no começo.** O emissor detecta a task por evento (`task_source`: `env`, `branch`, `path_write`, `sticky`, `path_read`). O primeiro `subagent.start` de uma execução pode sair **sem** `task_id`, antes de qualquer escrita em `tasks/<id>/`, e os eventos seguintes já saem com ele (`sticky`). Os `tool.*` de subagente trazem `agent.name` com o papel (`planner`); o `agent.type` (`planner-sonnet`) e o `instance_id` só vão quando o runtime os informa no payload. Quem agrupa por task ou por agente (portal, relatórios) deve religar: evento sem `task_id` herda o do mesmo `agent_id`/`instance_id`, depois o do mesmo `run_id`, depois o da sessão **se ela só viu uma task**; e papel solto vira o agente de `.claude/agents/` com esse papel, só se for único. O portal de gestão faz isso em `vincularEventos` (`gestao/serve.mjs`) e marca `task_inferido`. Corrigir na origem (o emissor ainda não tem task para dar ao primeiro evento) exige mudança no bundle gerado do hook e no vocabulário `task_source`: fica como proposta ao Tech Lead, não como patch.
+
 Qualquer validador JSON Schema 2020-12 serve para conferir um evento contra o arquivo. O consumidor aplica também as duas invariantes acima.
 
 ## Emissor (quando aplicado)
@@ -60,6 +62,10 @@ Garantias, cobertas pela suíte:
 - **nunca bloqueia:** sai com 0 em qualquer caso, não escreve em stderr, stdout vazio (ou `{}` onde o runtime exige JSON) e nunca devolve campo de decisão;
 - **prazo rígido** de 1,5 s por evento (1 s no fim de sessão) e disjuntor por coletor: com o coletor fora do ar, só uma invocação por janela paga o timeout de rede;
 - **redação antes de sair:** segredos, caminhos e conteúdo são tratados na origem. Em `standard`, o texto do prompt não sai (só o tamanho e um hash curto).
+
+## Ligar por máquina
+
+O hook só emite com `PLAYBOOK_TELEMETRY_URL` no ambiente da sessão. Em cada máquina: `node scripts/plano-assinatura.mjs --telemetria [--projeto <id>]` grava `PLAYBOOK_TELEMETRY_URL=spool` e `PLAYBOOK_PROJECT_ID=<id>` (padrão: nome da pasta em kebab-case) em `.claude/settings.local.json`, que não é versionado, preservando as demais chaves; é idempotente. `--verificar-telemetria` confere (0 ligada, 1 desligada, 3 sessão aberta antes). O portal de gestão (`gestao/`) roda fora da sessão e não herda esse `env`: ele lê o `settings.local.json` e o spool para saber que a telemetria está ligada.
 
 ## Spool local
 
