@@ -22,6 +22,10 @@ Escritor único: o Orchestrator (a sessão principal). Append-only no sentido de
 
 - {o que trava, quem destrava}
 
+## Checklist de pronto
+
+- [ ] `gestao/projeto.json` atualizado nesta sessão (status, bloqueios, decisões respondidas, pendências, aprovações, `atualizado`); pergunta sem resposta continua em `decisoes` sem `resposta`.
+
 ## Próxima ação exata
 
 {Uma instrução executável: "abrir /task da fatia X", "delegar Coder da fatia Y com o checkpoint artifacts/coder-checkpoint-02.md", …}

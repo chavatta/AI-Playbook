@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal de gestão</title>
+<style>
+:root{--bg:#F5F7FA;--sf:#fff;--bd:#E4E8EE;--tx:#0F1419;--mu:#4A5563;--tr:#E9EDF2;--ac:#F5A524;--okb:#E3F5EA;--okf:#136B3A;--inb:#E6EEFF;--inf:#1D4ED8;--wb:#FFF1D6;--wf:#7A4F00;--dg:#A3261B;--dgb:#FBE4E1}
+@media (prefers-color-scheme:dark){:root{--bg:#0E1217;--sf:#171D25;--bd:#2A323D;--tx:#E8ECF1;--mu:#A9B3C1;--tr:#232B36;--okb:#15291E;--okf:#6FD39B;--inb:#16233F;--inf:#8FB4FF;--wb:#2A2214;--wf:#F5B848;--dg:#F2897E;--dgb:#2e1a18}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,Segoe UI,Inter,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--bd);background:var(--sf);position:sticky;top:0;z-index:2}
+h1{margin:0;font-size:20px}h1 span{background:var(--ac);color:#0F1419;padding:1px 8px;border-radius:6px;margin-right:8px}
+h2{font-size:15px;margin:0 0 10px}main{max-width:1200px;margin:0 auto;padding:16px;display:grid;gap:16px}
+.g2{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px;min-width:0;overflow-x:auto}
+.mu{color:var(--mu)}.sm{font-size:12px}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.ok{background:var(--okb);color:var(--okf)}.in{background:var(--inb);color:var(--inf)}.wn{background:var(--wb);color:var(--wf)}.dg{background:var(--dgb);color:var(--dg)}.nt{background:var(--tr);color:var(--mu)}
+.bar{height:8px;background:var(--tr);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ac)}
+.fase{border-top:1px solid var(--bd);padding:10px 0}.fase:first-of-type{border:0}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+ul{margin:6px 0 0;padding:0;list-style:none}li{padding:3px 0;display:flex;gap:8px;align-items:flex-start}
+table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:5px 6px;border-top:1px solid var(--bd);vertical-align:top}th{font-size:12px;color:var(--mu);border:0}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.node{border:2px solid var(--bd);border-radius:8px;padding:6px 10px;background:var(--sf);min-width:92px;text-align:center}
+.node.active{border-color:var(--ac);box-shadow:0 0 0 3px #F5A52444;animation:p 1.4s infinite}.node.done{border-color:var(--okf)}.node.blocked{border-color:var(--dg)}
+.node.prox{border-style:dashed}
+@keyframes p{50%{box-shadow:0 0 0 6px #F5A52422}}@media (prefers-reduced-motion:reduce){.node.active{animation:none}}
+.arr{color:var(--mu)}
+.agents{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.ag{border:1px solid var(--bd);border-radius:8px;padding:8px}.ag.ativo{border-color:var(--ac);background:var(--wb)}
+.feed{max-height:300px;overflow:auto;font:12px ui-monospace,Consolas,monospace}.feed div{padding:2px 0;border-top:1px solid var(--bd)}
+.live{width:9px;height:9px;border-radius:50%;background:var(--okf);display:inline-block;margin-right:6px}.live.off{background:var(--dg)}
+details.d{border-top:1px solid var(--bd);padding:8px 0}details.d>summary{cursor:pointer;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pergunta{border:1px solid var(--ac);border-radius:8px;padding:8px;margin-bottom:8px;background:var(--wb)}
+</style></head><body>
+<header><h1><span id="nome">Projeto</span>Gestão do projeto</h1><div class="sm mu"><i id="lv" class="live off"></i><span id="up">conectando…</span></div></header>
+<main>
+ <section class="card"><div class="row"><h2>Progresso geral</h2><b id="pg"></b></div><div class="bar"><i id="pgb" style="width:0"></i></div><p class="sm mu" id="perr"></p></section>
+ <div class="g2">
+  <section class="card"><h2>Etapas e progresso</h2><div id="fases"></div></section>
+  <div style="display:grid;gap:16px;align-content:start">
+   <section class="card"><h2>Bloqueios</h2><div id="bloq"></div></section>
+   <section class="card"><h2>Decisões e perguntas</h2><div id="dec"></div></section>
+   <section class="card"><h2>Pendências manuais</h2><ul id="pend"></ul></section>
+   <section class="card"><h2>Aprovações e decisões (ADRs)</h2><div id="adrs"></div></section>
+  </div>
+ </div>
+ <section class="card"><h2>Fluxo da execução</h2><div id="flow"></div><p class="sm mu" id="flowsub"></p></section>
+ <div class="g2">
+  <section class="card"><h2>Agentes</h2><div class="agents" id="agents"></div></section>
+  <section class="card"><h2>Telemetria <span id="tel" class="pill nt"></span></h2><div class="feed" id="feed"></div></section>
+ </div>
+ <section class="card"><h2>Tokens e custo (Claude)</h2><div id="tok"></div></section>
+ <section class="card"><h2>Tasks</h2><div id="tasks"></div></section>
+</main>
+<script>
+const $=id=>document.getElementById(id)
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+const pill=(t,c)=>`<span class="pill ${c}">${esc(t)}</span>`
+const sc={feito:['feito','ok'],andamento:['em andamento','in'],pendente:['pendente','nt'],bloqueado:['bloqueado','dg']}
+const fmt=n=>n>=1e6?(n/1e6).toFixed(2)+' M':n>=1e3?(n/1e3).toFixed(1)+' k':String(Math.round(n||0))
+const usd=n=>'US$ '+(n||0).toFixed(2)
+const lista=(t,a)=>a&&a.length?`<div class="sm" style="margin-top:8px"><b>${t}</b><ul>${a.map(x=>`<li><span class="mu">•</span><span>${esc(x)}</span></li>`).join('')}</ul></div>`:''
+const par=(t,v)=>v?`<div class="sm" style="margin-top:8px"><b>${t}</b><div>${esc(v)}</div></div>`:''
+
+// <details> abertos sobrevivem aos redesenhos (e ao recarregar a página): estado por id em sessionStorage.
+let ABERTOS=new Set()
+try{ABERTOS=new Set(JSON.parse(sessionStorage.getItem('gestao-abertos')||'[]'))}catch(e){}
+document.addEventListener('toggle',ev=>{const d=ev.target;if(!d.matches||!d.matches('details[data-id]'))return
+ d.open?ABERTOS.add(d.dataset.id):ABERTOS.delete(d.dataset.id)
+ try{sessionStorage.setItem('gestao-abertos',JSON.stringify([...ABERTOS]))}catch(e){}},true)
+const aberto=id=>ABERTOS.has(id)?'open':''
+
+function render(s){
+ const P=s.projeto,fs=P.fases||[]
+ $('nome').textContent=P.nome||'Projeto';document.title=(P.nome||'Projeto')+' · Gestão'
+ $('perr').textContent=P.erro?('Atenção: '+P.erro+'. O portal mostra o que conseguiu ler.'):(P.atualizado?'projeto.json atualizado em '+P.atualizado:'')
+ const it=fs.flatMap(f=>f.itens||[]),done=it.filter(i=>i.s==='feito').length
+ const pct=fs.length?Math.round(fs.reduce((a,f)=>a+(f.status==='feito'?1:(f.itens&&f.itens.length?f.itens.filter(i=>i.s==='feito').length/f.itens.length:0)),0)/fs.length*100):0
+ $('pg').textContent=fs.length?pct+'% · '+done+'/'+it.length+' itens detalhados':'sem fases cadastradas'
+ $('pgb').style.width=pct+'%'
+ $('fases').innerHTML=fs.map(f=>{const n=(f.itens||[]).length,d=(f.itens||[]).filter(i=>i.s==='feito').length,[l,c]=sc[f.status]||sc.pendente
+  return `<div class="fase"><div class="row"><b>Fase ${esc(f.id)}: ${esc(f.nome)}</b>${pill(l,c)}</div>${n?`<div class="bar" style="margin:6px 0"><i style="width:${d/n*100}%"></i></div><ul>${f.itens.map(i=>{const x=sc[i.s]||sc.pendente;return `<li>${pill(x[0],x[1])}<span>${esc(i.t)}${i.bloqueio_id?' '+pill('→ '+i.bloqueio_id,'dg'):''}</span></li>`}).join('')}</ul>`:''}</div>`}).join('')||'<p class="mu">Nenhuma fase em gestao/projeto.json.</p>'
+ renderBloq(s)
+ renderDec(P)
+ $('pend').innerHTML=(P.pendencias_manuais||[]).map(b=>`<li>${pill('manual','wn')}<span>${esc(b)}</span></li>`).join('')||'<li class="mu">Nada.</li>'
+ renderAdrs(s,P)
+ renderFlow(s)
+ $('agents').innerHTML=s.agentes.map(a=>`<div class="ag ${a.estado==='ativo'?'ativo':''}"><div class="row"><b class="sm">${esc(a.nome)}</b>${pill(a.estado,a.estado==='ativo'?'wn':'nt')}</div><div class="sm">${esc(a.modelo||'?')}${a.esforco?' · '+esc(a.esforco):''}</div><div class="sm mu">${a.execucoes} exec · ${a.ferramentas} tools</div></div>`).join('')||'<p class="mu">Sem .claude/agents/*.md neste projeto.</p>'
+ const T=s.telemetria
+ $('tel').textContent=T.configurada?(T.modo+' · '+T.eventos+' eventos'):'desligada'
+ $('feed').innerHTML=s.eventos.slice(-80).reverse().map(e=>`<div>${esc(String(e.ts).slice(11,19))} <b>${esc(e.type)}</b> ${esc(e.agent||'')} ${esc(e.task_id||'')}</div>`).join('')||`<div class="mu">${T.configurada?'Ligada, aguardando eventos.':'Telemetria desligada nesta máquina. Ative com PLAYBOOK_TELEMETRY_URL=spool e PLAYBOOK_PROJECT_ID em .claude/settings.local.json (ONBOARDING.md) e reinicie o Claude Code.'}</div>`
+ renderTok(s.tokens)
+ $('tasks').innerHTML=s.tasks.length?`<table><tr><th>Task</th><th>Objetivo</th><th>Complex.</th><th>Sensível</th><th>Estado</th><th>Artefatos</th></tr>${s.tasks.map(t=>`<tr><td>${esc(t.id)}</td><td>${esc(t.objetivo)}</td><td>${esc(t.complexidade)}</td><td>${esc(t.sensivel)}</td><td>${pill(t.estado,t.estado==='done'?'ok':t.estado==='blocked'?'dg':'in')}</td><td class="sm">${esc(t.artifacts.join(', '))}</td></tr>`).join('')}</table>`:'<p class="mu">Nenhuma task aberta ainda. Abra com /task.</p>'
+}
+
+function renderBloq(s){
+ const L=s.projeto.bloqueios||[],gv={alta:'dg',media:'wn',baixa:'nt'}
+ const afet=id=>(s.projeto.fases||[]).flatMap(f=>(f.itens||[]).filter(i=>i.bloqueio_id===id).map(i=>f.nome+': '+i.t))
+ const itens=L.map(b=>`<details class="d" data-id="b:${esc(b.id)}" ${aberto('b:'+b.id)}><summary>${pill(b.id,'dg')}<b>${esc(b.titulo)}</b>${pill('gravidade '+(b.gravidade||'?'),gv[b.gravidade]||'nt')}<span class="sm mu">desde ${esc(b.desde||'')}</span></summary>${par('O que bloqueia',b.bloqueia)}${par('Por que está bloqueado',b.causa)}${lista('Itens afetados',afet(b.id))}${b.depende_de.length?par('Depende de',b.depende_de.join(', ')):''}${lista('Como resolver (passo a passo)',b.resolver)}${par('Pronto quando',b.pronto_quando)}${par('Quem resolve',b.dono)}${lista('Arquivos',b.arquivos)}</details>`).join('')
+ const tb=s.tasks.filter(t=>t.estado==='blocked').map(t=>`<details class="d" data-id="t:${esc(t.id)}" ${aberto('t:'+t.id)}><summary>${pill('task','dg')}<b>Task ${esc(t.id)} bloqueada</b></summary>${par('Objetivo',t.objetivo)}${par('Último evento',(t.log.at(-1)||{}).event+' '+((t.log.at(-1)||{}).ref||''))}<div class="sm mu" style="margin-top:8px">Veja tasks/${esc(t.id)}/run-log.md${t.decisions?' e decisions.md':''}.</div></details>`).join('')
+ $('bloq').innerHTML=(itens+tb)||'<p class="mu">Nenhum bloqueio.</p>'
+}
+
+function renderDec(P){
+ const D=P.decisoes||[],ab=D.filter(d=>!d.resposta),fe=D.filter(d=>d.resposta)
+ const op=d=>'<ul>'+d.opcoes.map(o=>'<li><span class="mu">•</span><span>'+esc(o)+(o===d.resposta?' '+pill('escolhida','ok'):'')+'</span></li>').join('')+'</ul>'
+ const a=ab.map(d=>'<div class="pergunta">'+pill('aguardando sua resposta','wn')+' <b>'+esc(d.pergunta)+'</b>'+op(d)+'<div class="sm mu">Responda na conversa com o Claude; ele registra aqui e no ADR.</div></div>').join('')
+ const f=fe.map(d=>'<details class="d" data-id="d:'+esc(d.id)+'" '+aberto('d:'+d.id)+'><summary>'+pill(d.id,'ok')+' <b>'+esc(d.resposta)+'</b> <span class="sm mu">'+esc(d.pergunta)+'</span></summary><div class="sm" style="margin-top:6px">'+op(d)+'<div class="mu">por '+esc(d.por)+' em '+esc(d.data)+(d.registro?' · registro: '+esc(d.registro):'')+'</div></div></details>').join('')
+ $('dec').innerHTML=(a+f)||'<p class="mu">Nenhuma decisão registrada.</p>'
+}
+
+function renderAdrs(s,P){
+ const ok=s.adrs.filter(a=>/^\s*(Aprovado|Aceito|Accepted|Aceita)/i.test(a.status)).length
+ const lab=a=>/^\s*(Aprovado|Aceito|Aceita|Accepted)/i.test(a.status)?[a.status,'ok']:/^\s*(Proposto|Proposed|Rascunho|Draft)/i.test(a.status)?[a.status,'wn']:/^\s*(Rejeitad|Substitu|Supersed|Obsolet|Deprecad)/i.test(a.status)?[a.status,'dg']:[a.status,'nt']
+ const ap=(P.aprovacoes||[]).map(a=>esc(a.t)+' por '+esc(a.quem)+' em '+esc(a.data)).join('; ')
+ $('adrs').innerHTML=s.adrs.length?`<p class="sm mu">${ok}/${s.adrs.length} ADRs aprovados. ${ap}</p><table><tr><th>ID</th><th>Decisão</th><th>Status</th></tr>${s.adrs.map(a=>{const l=lab(a);return `<tr><td>${esc(a.id)}</td><td>${esc(a.titulo)}</td><td>${pill(String(l[0]).slice(0,60),l[1])}</td></tr>`}).join('')}</table>`:`<p class="mu">Nenhum ADR em docs/adr/ ou docs/ADR-*.md. ${ap}</p>`
+}
+
+function renderFlow(s){
+ const FS={ativo:['em execução','active'],concluido:['concluído','done'],falhou:['falhou','blocked'],bloqueado:['bloqueado','blocked'],revisao:['aguarda revisão','active']}
+ const fl=s.fluxos||[],vivos=fl.filter(f=>f.emExecucao)
+ const desenho=f=>`<div style="margin:8px 0 14px"><div class="row sm"><b>${esc(f.task||f.id)}</b><span>${f.emExecucao?pill('em execução','wn'):pill(f.estado||'encerrado','nt')} <span class="mu">${esc(String(f.atualizado).slice(0,16).replace('T',' '))}${f.origem==='run-log'?' · via run-log':''}${f.esforcoSessao?' · sessão principal: esforço '+esc(f.esforcoSessao):''}</span></span></div><div class="flow" style="margin-top:6px">${f.passos.map((p,i)=>{const x=FS[p.estado]||['aguardando',''];return `${i?'<span class="arr">→</span>':''}<div class="node ${x[1]}"><b>${esc(p.agent)}</b><div class="sm mu">${x[0]}${p.duracao_ms?' · '+Math.round(p.duracao_ms/1000)+'s':''}</div>${p.modelo?`<div class="sm" title="${p.modelo_origem==='real'?'modelo informado pela telemetria':'modelo configurado no agente'}">${esc(p.modelo)}${p.esforco?' · '+esc(p.esforco):''}${p.modelo_origem==='configurado'?'*':''}</div>`:''}</div>`}).join('')}${f.proximo?`<span class="arr">→</span><div class="node prox"><b>${esc(f.proximo)}</b><div class="sm mu">próximo</div></div>`:''}</div></div>`
+ $('flow').innerHTML=vivos.length?vivos.map(desenho).join(''):(fl.length?'<p class="mu sm">Nada rodando agora. Última execução:</p>'+desenho(fl[0]):'')
+ $('flowsub').textContent=vivos.length||fl.length?'Agentes na ordem real dos eventos; tracejado = próximo agente anunciado no handoff. Modelo e esforço: * = valor configurado em .claude/agents (a telemetria só informa o esforço da sessão principal).':'Nenhuma execução ainda. Quando um /task rodar, o fluxo dele aparece aqui, com as etapas que ele realmente tiver.'
+}
+
+const TIPOS=[['entrada','Entrada (sem cache)','#1D4ED8'],['escrita','Escrita de cache','#F5A524'],['releitura','Leitura de cache','#136B3A'],['saida','Saída','#A3261B']]
+function renderTok(t){
+ if(!t||!t.linhas&&!Object.keys(t.live||{}).length){$('tok').innerHTML='<p class="mu">Sem dados de tokens ainda (nenhuma transcrição do Claude Code encontrada para este projeto).</p>';return}
+ const T=t.total,all=T.entrada+T.escrita+T.releitura+T.saida,hit=Math.round((t.cacheHit||0)*100)
+ const tiles=TIPOS.map(([k,n])=>`<div class="ag"><div class="sm mu">${n}</div><b style="font-size:18px">${fmt(T[k])}</b><div class="sm mu">${all?Math.round(T[k]/all*100):0}%</div></div>`).join('')+`<div class="ag"><div class="sm mu">Custo estimado</div><b style="font-size:18px">${usd(T.custo)}</b><div class="sm mu">preço de lista</div></div><div class="ag"><div class="sm mu">Cache hit</div><b style="font-size:18px">${hit}%</b><div class="sm mu">leitura ÷ contexto lido</div></div>`
+ const bar=x=>{const s=x.entrada+x.escrita+x.releitura+x.saida||1;return `<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--tr)">${TIPOS.map(([k,,c])=>`<i style="width:${x[k]/s*100}%;background:${c}"></i>`).join('')}</div>`}
+ const tab=(tit,col,m)=>`<h2 style="margin-top:14px">${tit}</h2><table><tr><th>${col}</th><th>Entrada</th><th>Esc. cache</th><th>Leit. cache</th><th>Saída</th><th>Custo</th><th></th></tr>${Object.entries(m).sort((a,b)=>b[1].custo-a[1].custo).map(([k,x])=>`<tr><td>${esc(k)}</td><td>${fmt(x.entrada)}</td><td>${fmt(x.escrita)}</td><td>${fmt(x.releitura)}</td><td>${fmt(x.saida)}</td><td>${usd(x.custo)}</td><td style="min-width:90px">${bar(x)}</td></tr>`).join('')}</table>`
+ const sess=t.sessoes.length?`<h2 style="margin-top:14px">Por sessão</h2><table><tr><th>Sessão</th><th>Papel</th><th>Modelo</th><th>Chamadas</th><th>Leit. cache</th><th>Saída</th><th>Custo</th></tr>${t.sessoes.slice().reverse().map(x=>`<tr><td>${esc(x.id)}</td><td>${esc(x.papel)}</td><td>${esc(x.modelo)}</td><td>${x.chamadas}</td><td>${fmt(x.releitura)}</td><td>${fmt(x.saida)}</td><td>${usd(x.custo)}</td></tr>`).join('')}</table>`:''
+ const lk=Object.keys(t.live||{}),live=lk.length?`<h2 style="margin-top:14px">Ao vivo por agente (usage.report)</h2><table><tr><th>Agente</th><th>Entrada</th><th>Esc. cache</th><th>Leit. cache</th><th>Saída</th></tr>${lk.map(k=>{const x=t.live[k];return `<tr><td>${esc(k)}</td><td>${fmt(x.entrada)}</td><td>${fmt(x.escrita)}</td><td>${fmt(x.releitura)}</td><td>${fmt(x.saida)}</td></tr>`}).join('')}</table>`:''
+ const leg=TIPOS.map(([,n,c])=>`<span class="sm"><i style="display:inline-block;width:10px;height:10px;background:${c};border-radius:2px"></i> ${n}</span>`).join(' &nbsp; ')
+ $('tok').innerHTML=`<div class="agents">${tiles}</div><div style="margin:10px 0">${bar(T)}<div style="margin-top:4px">${leg}</div></div>${tab('Por papel','Papel',t.porPapel)}${tab('Por modelo','Modelo',t.porModelo)}${sess}${live}<p class="sm mu">Fonte: transcrições do Claude Code (scripts/telemetria/relatorio-custos.mjs) e eventos usage.report. O custo usa preço de lista (scripts/telemetria/precos.json); em assinatura Pro/Max o que conta é a cota, não o dólar.</p>`
+}
+
+// Polling de 3 s. Só redesenha se os dados mudaram (compara o JSON sem o carimbo de tempo).
+let ULTIMO=''
+async function tick(){try{const r=await fetch('/api/state',{cache:'no-store'});const s=await r.json();const sig=JSON.stringify({...s,gerado:0});if(sig!==ULTIMO){ULTIMO=sig;render(s)}$('lv').className='live';$('up').textContent='atualizado '+new Date(s.gerado).toLocaleTimeString('pt-BR')}catch(e){$('lv').className='live off';$('up').textContent='sem conexão: rode node gestao/serve.mjs'}}
+tick();setInterval(tick,3000)
+</script></body></html>

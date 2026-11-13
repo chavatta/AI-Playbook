@@ -1,0 +1,42 @@
+{
+  "nome": "Nome do projeto",
+  "atualizado": "AAAA-MM-DD",
+  "fases": [
+    {"id": 0, "nome": "Fundação e decisões", "status": "andamento", "itens": [
+      {"t": "Exemplo de item concluído: ADRs iniciais aprovados", "s": "feito"},
+      {"t": "Exemplo de item em andamento: monorepo e CI", "s": "andamento"},
+      {"t": "Exemplo de item bloqueado: escolher a ferramenta de geração do cliente da API", "s": "bloqueado", "bloqueio_id": "B1"},
+      {"t": "Exemplo de item pendente: ambiente de homologação", "s": "pendente"}
+    ]},
+    {"id": 1, "nome": "Primeira entrega", "status": "pendente", "itens": []}
+  ],
+  "decisoes": [
+    {"id": "Q1", "pergunta": "Exemplo pendente: qual banco de dados usamos?", "opcoes": ["PostgreSQL gerenciado", "SQLite embarcado", "Outro (descreva)"], "registro": "docs/adr/0001-banco-de-dados.md"},
+    {"id": "Q2", "pergunta": "Exemplo respondida: onde fica o código?", "opcoes": ["Monorepo", "Repositórios separados"], "resposta": "Monorepo", "por": "Nome do dev", "data": "AAAA-MM-DD", "registro": "docs/adr/0000-estrutura-do-repositorio.md"}
+  ],
+  "bloqueios": [
+    {
+      "id": "B1",
+      "titulo": "Exemplo: ferramenta de geração do cliente da API não escolhida",
+      "desde": "AAAA-MM-DD",
+      "gravidade": "media",
+      "bloqueia": "O que não pode andar enquanto isto não for resolvido",
+      "causa": "Por que está bloqueado, em uma ou duas frases",
+      "resolver": [
+        "Primeiro passo concreto",
+        "Segundo passo concreto",
+        "Registrar a escolha no ADR correspondente"
+      ],
+      "pronto_quando": "Critério verificável de que o bloqueio acabou",
+      "dono": "Quem resolve (ex.: Claude executa; dev aprova)",
+      "arquivos": ["docs/adr/0001-exemplo.md"],
+      "depende_de": []
+    }
+  ],
+  "aprovacoes": [
+    {"t": "Exemplo: ADRs iniciais", "quem": "Nome do dev", "data": "AAAA-MM-DD", "ok": true}
+  ],
+  "pendencias_manuais": [
+    "Exemplo: criar a conta do serviço X (só o dev pode fazer)"
+  ]
+}

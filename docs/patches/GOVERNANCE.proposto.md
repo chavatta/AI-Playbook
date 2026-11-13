@@ -56,7 +56,7 @@
 1. **Repo primeiro:** criar o repositório GitHub **privado** (conta/organização definida pelo Tech Lead) antes de qualquer commit. Público só por ordem explícita do Tech Lead. **Branch protection** em `main`/`master` ativada imediatamente após criar o repo (§2.6) — é configuração do Tech Lead.
 2. Nome do repo em kebab-case; remote `origin` configurado de imediato.
 3. Primeiro commit mínimo: `README.md` + `.gitignore` adequado à stack.
-4. Para adotar este playbook no repo novo: copie `.claude/`, `multi-agents/`, `praticas/`, `scripts/`, `tasks/_TEMPLATE/`, `docs/` e os docs da raiz (`README.md`, `DESENVOLVIMENTO-COM-IA.md`, `ONBOARDING.md`, este arquivo) — comandos no `README.md`. No repo novo, apague `docs/patches/` (são propostas de mudança nas travas do playbook, não do projeto) e `docs/COMPETENCIA.md`, que fica só no repo do playbook (registro da organização).
+4. Para adotar este playbook no repo novo: copie `.claude/`, `multi-agents/`, `praticas/`, `scripts/`, `gestao/` (portal de gestão, `docs/ADR-012`), `tasks/_TEMPLATE/`, `docs/` e os docs da raiz (`README.md`, `DESENVOLVIMENTO-COM-IA.md`, `ONBOARDING.md`, este arquivo) — comandos no `README.md`. No repo novo, apague `docs/patches/` (são propostas de mudança nas travas do playbook, não do projeto) e `docs/COMPETENCIA.md`, que fica só no repo do playbook (registro da organização).
 
 ---
 

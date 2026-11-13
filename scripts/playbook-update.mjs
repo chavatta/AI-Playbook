@@ -21,8 +21,8 @@ const ESTADO = join(RAIZ, ".playbook-sync.json");
 const STAGING = join(RAIZ, ".playbook-update");
 const TIMEOUT_MS = 15000;
 
-// Fora da comparação: é do projeto, não do playbook.
-const IGNORAR = [".git/", ".playbook-update/", "tasks/", ".claude/settings.local.json", ".playbook-sync.json", "praticas/00-stack-e-defaults.md"];
+// Fora da comparação: é do projeto, não do playbook (gestao/projeto.json é dado do projeto; o template vem em gestao/projeto.template.json).
+const IGNORAR = [".git/", ".playbook-update/", "tasks/", ".claude/settings.local.json", ".playbook-sync.json", "praticas/00-stack-e-defaults.md", "gestao/projeto.json"];
 // Zona protegida (GOVERNANCE.md §6.2): mudança aqui exige o ciclo do Tech Lead.
 const PROTEGIDOS = [".claude/settings.json", ".claude/hooks/", ".claude/workflows/", ".claude/agents/", "GOVERNANCE.md"];
 

@@ -86,7 +86,7 @@ O frontmatter do Security-SRE continua `model: fable`. O que muda é a máquina:
 
 | Plano (`PLAYBOOK_PLANO`) | Fable no plano | Security-SRE roda em |
 |---|---|---|
-| `max`, `team-premium`, `enterprise-premium` | incluído (até 50% do limite semanal) | **Fable** |
+| `max` (inclui Ultra, gravado como `max`), `team-premium`, `enterprise-premium` | incluído (até 50% do limite semanal) | **Fable** |
 | `api` (chave de API ou provedor de terceiros) | cobrado por token | **Fable** |
 | `pro`, `team-standard`, `enterprise-standard` | crédito avulso | **Opus** (`claude-opus-5-5`) |
 
